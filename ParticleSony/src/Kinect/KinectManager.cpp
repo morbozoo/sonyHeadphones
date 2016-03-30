@@ -240,6 +240,10 @@ namespace kinect {
 		mPhysicsManager->addParticle(pos);
 	}
 
+	void KinectManager::deleteParticle()
+	{
+		mPhysicsManager->deleteParticle();
+	}
 
 	int KinectManager::getParticleSize()
 	{

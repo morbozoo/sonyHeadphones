@@ -255,4 +255,9 @@ namespace physics{
 		}
 	}
 
+	void ParticleManager::deleteParticle()
+	{
+		mBoxes.erase(mBoxes.begin());
+	}
+
 }

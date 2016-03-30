@@ -122,6 +122,7 @@ namespace physics{
 
 		//add a particle to te physics
 		void addParticle(ci::vec2 &  pos);
+		void deleteParticle();
 
 		int getNumParticles(){ return mBoxes.size(); }
 

@@ -87,6 +87,7 @@ void ParticleSonyApp::setup()
 //	mTimeStep = SystemVars::getInstance().speed_w;
 
 	rateParticles = 150;
+	maxNumParticles = 300;
 
 	mNumKinects = mKinectManagerRef->getNumKinects();
 	CI_LOG_I("NUM KINECTS CREATED " << mNumKinects);
@@ -106,6 +107,7 @@ void ParticleSonyApp::setup()
 	mParams->addSeparator();
 
 	mParams->addParam("Particle rate", &rateParticles, "min=1 max=150 step=1");
+	mParams->addParam("Max number particles", &maxNumParticles, "min=300 max=1000 step=1");
 
 
 	////	mParams->addParam("Scale Contour X", &mKinectManagerRef->mScaleContour.x, "min=0 max=15 step=0.01");
@@ -129,6 +131,10 @@ void ParticleSonyApp::updateMode()
 			float x = ci::randFloat(60, getWindowWidth() - 80);
 			float y = 150;
 			mKinectManagerRef->addParticle(ci::vec2(x, y));
+		}
+
+		while (mKinectManagerRef->getParticleSize() > maxNumParticles){
+			mKinectManagerRef->deleteParticle();
 		}
 
 		break;

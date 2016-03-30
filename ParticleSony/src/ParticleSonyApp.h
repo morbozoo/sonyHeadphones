@@ -107,6 +107,7 @@ private:
 	int									numParticles;
 	int									numParticlesBox2d;
 	int									rateParticles;
+	int									maxNumParticles;
 
 
 

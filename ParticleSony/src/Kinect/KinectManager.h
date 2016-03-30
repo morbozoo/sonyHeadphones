@@ -103,6 +103,7 @@ namespace kinect {
 
 
 		void addParticle(ci::vec2 & pos);
+		void deleteParticle();
 		int getParticleSize();
 
 		int getNumKinects(){ return mDevices.size(); }
