@@ -51,6 +51,7 @@
 #include "cinder/Filesystem.h"
 #include "cinder/app/msw/AppImplMswBasic.h"
 
+#include "cinder/Timeline.h"
 
 #include "Kinect\KinectManager.h"
 
@@ -108,7 +109,7 @@ private:
 	int									numParticlesBox2d;
 	int									rateParticles;
 	int									maxNumParticles;
-
+	int									changeColor;
 
 
 	shaders::BloomRef					mBloom;
@@ -125,5 +126,14 @@ private:
 	unsigned int g_Width, g_Height;				// size of the texture being sent out
 	char SenderName[256];
 	ci::gl::Texture2dRef spoutTexture;				// Local Cinder texture used for sharing
+
+	//Change color
+	
+	void timeColor(float colR, float colG, float colB);
+	float duration;
+	ci::Color   mColor;
+	ci::Anim<float>   colorR;
+	ci::Anim<float>   colorG;
+	ci::Anim<float>   colorB;
 	// ----------------------------
 };

@@ -88,6 +88,8 @@ void ParticleSonyApp::setup()
 
 	rateParticles = 150;
 	maxNumParticles = 300;
+	changeColor = 0;
+	duration = 2.0f;
 
 	mNumKinects = mKinectManagerRef->getNumKinects();
 	CI_LOG_I("NUM KINECTS CREATED " << mNumKinects);
@@ -107,13 +109,16 @@ void ParticleSonyApp::setup()
 	mParams->addSeparator();
 
 	mParams->addParam("Particle rate", &rateParticles, "min=1 max=150 step=1");
-	mParams->addParam("Max number particles", &maxNumParticles, "min=300 max=1000 step=1");
-
+	mParams->addParam("Max number particles", &maxNumParticles, "min=3 max=1000 step=1");
+	mParams->addParam("Change Color", &changeColor, "min=0 max=1 step=1");
+	mParams->addParam("duration", &duration, "min=0.5 max=5.0 step=0.1");
 
 	////	mParams->addParam("Scale Contour X", &mKinectManagerRef->mScaleContour.x, "min=0 max=15 step=0.01");
 	////	mParams->addParam("Scale Contour Y", &mKinectManagerRef->mScaleContour.y, "min=0 max=15 step=0.01");
 	//mParams->addParam("Kinect Translate Y", &mKinectManagerRef->mKinectTranslateY, "min=-450 max=450 step=1");
-
+	colorR = 0;
+	colorG = 0;
+	colorB = 0;
 }
 
 // Runs update logic
@@ -160,11 +165,16 @@ void ParticleSonyApp::update()
 	
 	mNumKinects  = mKinectManagerRef->getNumKinects();
 
-
-
 }
 
 
+void ParticleSonyApp::timeColor(float colR, float colG, float colB) 
+{
+	timeline().apply(&colorR, colR, duration, EaseInCubic());
+	timeline().apply(&colorG, colG, duration, EaseInCubic());
+	timeline().apply(&colorB, colB, duration, EaseInCubic());
+
+}
 
 void ParticleSonyApp::drawMode()
 {
@@ -172,7 +182,7 @@ void ParticleSonyApp::drawMode()
 
 	case 0:
 		mKinectManagerRef->drawParticlesBox2d();
-		mKinectManagerRef->drawUpdateTriangulated();
+		mKinectManagerRef->drawUpdateTriangulated(colorR, colorG, colorB);
 
 		if (mDrawContours){
 			mKinectManagerRef->drawContours();
@@ -180,7 +190,7 @@ void ParticleSonyApp::drawMode()
 		break;
 
 	case 1:
-		mKinectManagerRef->drawParticleGrid();
+		mKinectManagerRef->drawParticleGrid(colorR, colorG, colorB);
 		break;
 	}
 }
@@ -195,14 +205,13 @@ void ParticleSonyApp::draw()
 	gl::ScopedMatrices matrices;
 	ci::gl::setMatricesWindow(getWindowSize(), true);
 	ci::gl::setModelMatrix(ci::mat4());
-
-	
 	drawMode();
 
 	if (mDrawGUI)
 		mParams->draw();
 
 	sendSpout();
+
 }
 
 // -------- SPOUT ------------
@@ -248,6 +257,28 @@ void ParticleSonyApp::keyDown(KeyEvent event)
 	case KeyEvent::KEY_p:
 		//mKinectManagerRef->tooglePulse = true;
 		console() << "pulse" << std::endl;
+		break;
+	case KeyEvent::KEY_a:
+		mDrawMode = 1;
+		timeColor(1.0f, 1.0f, 0.0f);
+		break;
+	case KeyEvent::KEY_s:
+		mDrawMode = 0;
+		timeColor(1.0f, 0.0f, 1.0f);
+		break;
+	case KeyEvent::KEY_z:
+		colorR = 0;
+		colorG = 0;
+		colorB = 0;
+		mDrawMode = 1;
+		timeColor(1.0f, 1.0f, 0.0f);
+		break;
+	case KeyEvent::KEY_x:
+		colorR = 0;
+		colorG = 0;
+		colorB = 0;
+		mDrawMode = 0;
+		timeColor(1.0f, 0.0f, 1.0f);
 		break;
 	}
 }

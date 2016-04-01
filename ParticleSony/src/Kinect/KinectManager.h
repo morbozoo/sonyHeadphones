@@ -46,6 +46,7 @@
 #include "cinder/Perlin.h"
 
 
+
 #include "../blocks/KinectSdk/src/Kinectv1.h"
 
 #include "../Contour/ParticleContour.h"
@@ -94,11 +95,11 @@ namespace kinect {
 		void updateParticlesBox2d();
 		void drawParticlesBox2d();
 		void drawContours();
-		void drawUpdateTriangulated();
+		void drawUpdateTriangulated(float colR, float colG, float colB);
 
 
 		//particles grid
-		void drawParticleGrid();
+		void drawParticleGrid(float colorR, float coloG, float colorB);
 		void updateParticleGrid();
 
 
@@ -161,6 +162,7 @@ namespace kinect {
 
 		//Circle batch
 		ci::gl::BatchRef						mCircleBatch;
+
 
 		
 	};

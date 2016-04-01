@@ -85,6 +85,7 @@ namespace kinect {
 		//Circle Batch
 		gl::GlslProgRef solidShader = gl::getStockShader(gl::ShaderDef().color());
 		mCircleBatch = ci::gl::Batch::create(geom::Circle().radius(CIRCLE_RAD), solidShader);
+
 	}
 
 	void KinectManager::updateKinect()
@@ -121,12 +122,11 @@ namespace kinect {
 		mPhysicsManager->update();
 	}
 
-	void KinectManager::drawParticleGrid()
+	void KinectManager::drawParticleGrid(float colorR, float colorG, float colorB)
 	{
 		mTime += mTimeSpeed;
 
 		mPerlin = Perlin(mOctaves, mSeed);
-
 		int i = 0;
 		int j = 0;
 		for (std::vector<contour::Particle>::iterator partIt = mParticles.begin(); partIt != mParticles.end(); ++partIt) {
@@ -138,7 +138,6 @@ namespace kinect {
 				float val = v * 4;
 
 				ci::ColorA perlinColor = ci::ColorA(val, val, val, val);
-
 				partIt->setVelColor(perlinColor);
 			}
 
@@ -146,9 +145,11 @@ namespace kinect {
 			gl::pushModelMatrix();
 
 			ci::ivec2 pos = ci::ivec2(partIt->getPosition());
+			ci::ColorA outColor;
 
-			ci::ColorA outColor = ci::ColorA(1, 1, 1, partIt->getVelColor().r);
-
+				outColor = ci::ColorA(colorR, colorG, colorB, partIt->getVelColor().r);
+			
+			
 			//ci::ColorA col = mBackgroundImg->getPixel(pos);
 
 			gl::ScopedColor cdol(outColor);
@@ -166,7 +167,7 @@ namespace kinect {
 
 	}
 
-	void KinectManager::drawUpdateTriangulated()
+	void KinectManager::drawUpdateTriangulated(float colR, float colG, float colB)
 	{
 		//update contour with physics
 
@@ -182,7 +183,7 @@ namespace kinect {
 				if (mDrawTriangulatedContour && mesh.getNumVertices() > 3){
 					ci::gl::VboMeshRef	mVboMesh = ci::gl::VboMesh::create(mesh);
 
-					ci::gl::ScopedColor col(ci::ColorA(0.6, 0.6, 0.6, 1));
+					ci::gl::ScopedColor col(ci::ColorA(colR, colG, colB, 1));
 					ci::gl::enableWireframe();
 					ci::gl::draw(mVboMesh);
 					ci::gl::disableWireframe();
@@ -260,6 +261,8 @@ namespace kinect {
 		}
 		mDevices.clear();
 	}
+
+
 
 
 
