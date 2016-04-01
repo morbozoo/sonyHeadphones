@@ -66,11 +66,18 @@
 #include <boost/date_time/c_local_time_adjustor.hpp>
 
 #include "../blocks/Spout/include/Spout.h"
+//#include "../blocks/OSC/src/Osc.h"
+#include "OscSender.h"
+#include "OscListener.h"
+
+
+
 //spout
 //#include "Spout.h
 
-
-
+#define USE_UDP 1
+const std::string destinationHost = "127.0.0.1";
+const uint16_t destinationPort = 10001;
 
 class ParticleSonyApp : public ci::app::App
 {
@@ -135,5 +142,14 @@ private:
 	ci::Anim<float>   colorR;
 	ci::Anim<float>   colorG;
 	ci::Anim<float>   colorB;
-	// ----------------------------
+
+
+	// OSC
+	void setupOsc();
+	void updateOsc();
+	ci::osc::Sender sender;
+	ci::osc::Listener listener;
+
+	//moods
+	void setMood(int);
 };

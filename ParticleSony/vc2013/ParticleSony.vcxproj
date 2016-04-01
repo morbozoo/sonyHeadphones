@@ -166,7 +166,9 @@
     <ClCompile Include="..\..\..\Cinder\blocks\Box2D\src\Box2D\Rope\b2Rope.cpp" />
     <ClCompile Include="..\..\..\Cinder\blocks\Cinder-KinectSdk\src\Kinectv1.cpp" />
     <ClCompile Include="..\..\..\Cinder\blocks\OSC\src\OscBundle.cpp" />
-    <ClCompile Include="..\..\..\Cinder\blocks\OSC\src\OscListener.cpp" />
+    <ClCompile Include="..\..\..\Cinder\blocks\OSC\src\OscListener.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\Cinder\blocks\OSC\src\OscMessage.cpp" />
     <ClCompile Include="..\..\..\Cinder\blocks\OSC\src\OscSender.cpp" />
     <ClCompile Include="..\..\..\Cinder\blocks\OSC\src\ip\IpEndpointName.cpp" />

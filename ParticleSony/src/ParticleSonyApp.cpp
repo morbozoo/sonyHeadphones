@@ -119,6 +119,9 @@ void ParticleSonyApp::setup()
 	colorR = 0;
 	colorG = 0;
 	colorB = 0;
+
+	setupOsc();
+
 }
 
 // Runs update logic
@@ -267,23 +270,50 @@ void ParticleSonyApp::keyDown(KeyEvent event)
 		timeColor(1.0f, 0.0f, 1.0f);
 		break;
 	case KeyEvent::KEY_z:
+		setMood(1);
+		break;
+	case KeyEvent::KEY_x:
+		setMood(2);
+		break;
+	}
+}
+
+void ParticleSonyApp::setMood(int cual)
+{
+	ci::osc::Message message;
+	message.setAddress("/setMood/");
+	switch (cual) {
+	case 1:
 		colorR = 0;
 		colorG = 0;
 		colorB = 0;
 		mDrawMode = 1;
 		timeColor(1.0f, 1.0f, 0.0f);
+		message.addIntArg(1);
 		break;
-	case KeyEvent::KEY_x:
+
+	case 2:
 		colorR = 0;
 		colorG = 0;
 		colorB = 0;
 		mDrawMode = 0;
 		timeColor(1.0f, 0.0f, 1.0f);
+		message.addIntArg(2);
 		break;
 	}
+	sender.sendMessage(message);
 }
 
+void ParticleSonyApp::setupOsc()
+{
+	sender.setup(destinationHost, destinationPort, true);
+	listener.setup(12345);
+}
 
+void ParticleSonyApp::updateOsc()
+{
+
+}
 
 // Called on exit
 void ParticleSonyApp::shutdown()
