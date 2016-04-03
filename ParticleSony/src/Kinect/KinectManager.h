@@ -47,7 +47,7 @@
 
 
 
-#include "../blocks/KinectSdk/src/Kinectv1.h"
+#include "Kinectv1.h"
 
 #include "../Contour/ParticleContour.h"
 #include "../Contour/ParticlesBox2D.h"

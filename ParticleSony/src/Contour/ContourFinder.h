@@ -1,7 +1,7 @@
 #pragma once
 
 //#include "CinderOpenCV.h"
-#include "../blocks/OpenCV/include/CinderOpenCV.h"
+#include "CinderOpenCV.h"
 #include "cinder/Triangulate.h"
 
 
