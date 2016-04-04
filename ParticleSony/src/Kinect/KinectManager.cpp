@@ -209,7 +209,7 @@ namespace kinect {
 
 			gl::ScopedColor cdol(outColor);
 			gl::translate(partIt->getPosition());
-			gl::scale(vec2(1.0 + partIt->getVelocity() / 2.0));
+			gl::scale(vec2(1.0 + partIt->getVelocity() / 2.0) + partIt->getVelColor().r*10);
 			mCircleBatch->draw();
 			gl::popModelMatrix();
 
@@ -226,10 +226,11 @@ namespace kinect {
 	{
 		int limit = 0;
 
+		gl::ScopedLineWidth scpLineWidth(2.0f);
+
 		for (int i = 0; i < mGridDims.y; i++){
 			gl::ScopedColor col(ci::ColorA(colorR, colorG, colorB, 1.0));
 			gl::VertBatch vertLine(GL_LINE_STRIP);
-			vertLine.color(ci::ColorA(1, 1, 1, 1.0));
 
 			for (int j = limit; j < mGridDims.x - limit; j++){
 
@@ -260,10 +261,19 @@ namespace kinect {
 
 		int limit = 0;
 
+		mTime += mTimeSpeed;
+		mPerlin = Perlin(mOctaves, mSeed);
+
+
 		for (int i = 0; i < mGridDims.y; i++){
 			gl::ScopedColor col(ci::ColorA(colorR, colorG, colorB, 1.0));
 			gl::VertBatch vertLine(GL_LINE_STRIP);
-			vertLine.color(ci::ColorA(1, 1, 1, 1.0));
+
+			float v = (mPerlin.fBm(vec3(i/2.0, i, mTime) * mFrequency) + 1.0f) / 2.0f;
+			v *= v*v;
+			float val = v * 4;
+
+			gl::ScopedLineWidth scpLineWidth(1.0 + val*6.0f);
 
 			for (int j = limit; j < mGridDims.x - limit; j++){
 
@@ -279,11 +289,20 @@ namespace kinect {
 	void KinectManager::drawParticlesLineH(float colorR, float colorG, float colorB)
 	{
 
+		mTime += mTimeSpeed;
+		mPerlin = Perlin(mOctaves, mSeed);
 
 		for (int i = 0; i < mGridDims.x; i++){
 
 			gl::VertBatch vertLine(GL_LINE_STRIP);
 			gl::ScopedColor col(ci::ColorA(colorR, colorG, colorB, 1.0));
+
+			float v = (mPerlin.fBm(vec3(i, i/2.0, mTime) * mFrequency) + 1.0f) / 2.0f;
+			v *= v*v;
+			float val = v * 4;
+
+			gl::ScopedLineWidth scpLineWidth(1.0 + val*6.0f);
+
 			for (int j = 0; j < mGridDims.y; j++){
 				ci::vec2 pos = mParticles.at(i + j*mGridDims.x).getPosition();
 				vertLine.vertex(pos);
