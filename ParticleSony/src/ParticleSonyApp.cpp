@@ -267,7 +267,7 @@ void ParticleSonyApp::keyDown(KeyEvent event)
 		break;
 	case KeyEvent::KEY_s:
 		mDrawMode = 0;
-		timeColor(1.0f, 0.0f, 1.0f);
+		timeColor(0.29f, 0.0f, 1.0f);
 		break;
 	case KeyEvent::KEY_z:
 		setMood(1);
@@ -288,7 +288,7 @@ void ParticleSonyApp::setMood(int cual)
 		colorG = 0;
 		colorB = 0;
 		mDrawMode = 1;
-		timeColor(1.0f, 1.0f, 0.0f);
+		timeColor(0.29f, 0.05f, 0.1f);
 		message.addIntArg(1);
 		break;
 
@@ -297,7 +297,7 @@ void ParticleSonyApp::setMood(int cual)
 		colorG = 0;
 		colorB = 0;
 		mDrawMode = 0;
-		timeColor(1.0f, 0.0f, 1.0f);
+		timeColor(0.05f, 0.33f, 0.04f);
 		message.addIntArg(2);
 		break;
 	}
