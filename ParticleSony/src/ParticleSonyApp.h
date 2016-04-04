@@ -96,6 +96,11 @@ public:
 	void								updateMode();
 	void								drawMode();
 
+
+	//box2d
+	void								updateBox2D();
+	void								drawBox2D();
+
 	void								offScreenRendering();
 
 	static ci::fs::path findPath(const ci::fs::path & folder);
@@ -118,6 +123,7 @@ private:
 	int									mRateParticles;
 	int									mMaxNumParticles;
 	int									mChangeColor;
+	float								mPerlinValue;
 
 	//Bloom
 	shaders::BloomRef					mBloom;

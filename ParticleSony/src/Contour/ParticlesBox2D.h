@@ -89,6 +89,9 @@ namespace physics{
 		void			setId(int id){ mId = id; }
 		int				getId(){ return mId; }
 
+		void            setType(int val){ mType = val; }
+		int				getType(){ return mType; }
+
 	private:
 
 		//body particle, manages all the physics, collisions
@@ -100,6 +103,7 @@ namespace physics{
 
 		bool						mDead;
 		int							mId;
+		int							mType;
 
 	};
 
@@ -119,9 +123,9 @@ namespace physics{
 			return std::make_shared< ParticleManager >();
 		}
 
-		void setup();
+		void setup(ci::vec2 gravityWind);
 
-		void draw();
+		void draw(ci::ColorA col);
 
 		void update();
 
@@ -133,6 +137,8 @@ namespace physics{
 		void deleteParticle();
 
 		int getNumParticles(){ return mBoxes.size(); }
+
+		void setDrawMode(int value){ mDrawMode = value; }
 
 	private:
 		//Physics

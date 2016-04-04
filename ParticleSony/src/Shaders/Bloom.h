@@ -10,6 +10,7 @@
 #include "cinder/gl/Fbo.h"
 #include "cinder/gl/GlslProg.h"
 #include "cinder/app/App.h"
+#include "cinder/Log.h"
 
 
 namespace shaders{

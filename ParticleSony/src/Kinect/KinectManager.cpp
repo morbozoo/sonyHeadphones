@@ -49,10 +49,10 @@ namespace kinect {
 
 	}
 
-	void KinectManager::setupPhysics()
+	void KinectManager::setupPhysics(ci::vec2 gravity)
 	{
-		mPhysicsManager = ParticleManager::create();
-		mPhysicsManager->setup();
+		mBox2dManager = ParticleManager::create();
+		mBox2dManager->setup(gravity);
 	}
 
 	void KinectManager::setupParticleGrid()
@@ -86,6 +86,14 @@ namespace kinect {
 		gl::GlslProgRef solidShader = gl::getStockShader(gl::ShaderDef().color());
 		mCircleBatch = ci::gl::Batch::create(geom::Circle().radius(CIRCLE_RAD), solidShader);
 
+		//square
+		mSquareBatch = ci::gl::Batch::create(geom::Rect(), solidShader);
+
+		mSeed = clock() & 65535;
+		mOctaves = 8;
+		mFrequency = 1 / 200.0f;
+		mTimeSpeed = 0.8;
+		mTime = 0.0;
 	}
 
 	void KinectManager::updateKinect()
@@ -119,12 +127,57 @@ namespace kinect {
 
 	void KinectManager::updateParticlesBox2d()
 	{
-		mPhysicsManager->update();
+		mBox2dManager->update();
 
-		mPhysicsManager->clean();
+		mBox2dManager->clean();
 	}
 
+	void KinectManager::drawParticleSquareGrid(float colorR, float colorG, float colorB)
+	{
+		mTime += mTimeSpeed;
 
+		mPerlin = Perlin(mOctaves, mSeed);
+		int i = 0;
+		int j = 0;
+
+		for (std::vector<contour::Particle>::iterator partIt = mParticles.begin(); partIt != mParticles.end(); ++partIt) {
+
+			//if (!partIt->isActivated()){
+			float v = (mPerlin.fBm(vec3(j, i, mTime) * mFrequency) + 1.0f) / 2.0f;
+
+			v *= v*v;
+			float val = v * 4;
+
+			ci::ColorA perlinColor = ci::ColorA(val, val, val, val);
+			partIt->setVelColor(perlinColor);
+			//}
+
+			gl::pushModelMatrix();
+
+			ci::ivec2 pos = ci::ivec2(partIt->getPosition());
+			ci::ColorA outColor;
+
+			outColor = ci::ColorA(colorR, colorG, colorB, partIt->getVelColor().r);
+
+
+			//ci::ColorA col = mBackgroundImg->getPixel(pos);
+
+			gl::ScopedColor cdol(outColor);
+			gl::translate(partIt->getPosition());
+			gl::scale(vec2(1.0 + partIt->getVelocity() / 1.5 + val*10));
+			
+			mSquareBatch->draw();
+
+			gl::popModelMatrix();
+
+			if (i >= mGridDims.x){
+				j++;
+				i = 0;
+			}
+			i++;
+		}
+
+	}
 
 	void KinectManager::drawParticlePointGrid(float colorR, float colorG, float colorB)
 	{
@@ -150,8 +203,7 @@ namespace kinect {
 			ci::ivec2 pos = ci::ivec2(partIt->getPosition());
 			ci::ColorA outColor;
 
-			outColor = ci::ColorA(1, 1, 1, partIt->getVelColor().r);
-
+			outColor = ci::ColorA(colorR, colorG, colorB, partIt->getVelColor().r);
 
 			//ci::ColorA col = mBackgroundImg->getPixel(pos);
 
@@ -267,7 +319,7 @@ namespace kinect {
 						}
 					}
 
-					mPhysicsManager->addContourTriangulation(mesh);
+					mBox2dManager->addContourTriangulation(mesh);
 				}
 			}
 		}
@@ -278,9 +330,9 @@ namespace kinect {
 
 	}
 
-	void KinectManager::drawParticlesBox2d()
+	void KinectManager::drawParticlesBox2d(ci::ColorA col)
 	{
-		mPhysicsManager->draw();
+		mBox2dManager->draw(col);
 	}
 
 	void KinectManager::drawContours()
@@ -321,17 +373,17 @@ namespace kinect {
 
 	void KinectManager::addParticle(ci::vec2 & pos)
 	{
-		mPhysicsManager->addParticle(pos);
+		mBox2dManager->addParticle(pos);
 	}
 
 	void KinectManager::deleteParticle()
 	{
-		mPhysicsManager->deleteParticle();
+		mBox2dManager->deleteParticle();
 	}
 
 	int KinectManager::getParticleSize()
 	{
-		return mPhysicsManager->getNumParticles();
+		return mBox2dManager->getNumParticles();
 	}
 
 	void KinectManager::cleanUp()

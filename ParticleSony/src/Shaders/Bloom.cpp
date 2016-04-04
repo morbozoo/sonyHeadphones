@@ -32,7 +32,7 @@ namespace shaders{
 
 		this->bloomDims = dims;
 		this->bloomBounds = ci::Area(0, 0, dims.x, dims.y);
-		ci::app::console() << "bloom bounds " << bloomBounds << std::endl;
+		CI_LOG_I("bloom bounds " << bloomBounds);
 
 	}
 
@@ -42,7 +42,7 @@ namespace shaders{
 			mShaderBlur = ci::gl::GlslProg::create(ci::app::loadAsset("blur_vert.glsl"), ci::app::loadAsset("blur_frag.glsl"));
 		}
 		catch (std::exception &exc) {
-			ci::app::console()<<"exception caught what: " << exc.what()<<std::endl;
+			CI_LOG_E("exception caught what: " << exc.what());
 		}
 	}
 
