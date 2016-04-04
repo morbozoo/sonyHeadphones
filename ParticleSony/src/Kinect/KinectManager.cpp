@@ -49,10 +49,10 @@ namespace kinect {
 
 	}
 
-	void KinectManager::setupPhysics()
+	void KinectManager::setupPhysics(ci::vec2 gravity)
 	{
-		mPhysicsManager = ParticleManager::create();
-		mPhysicsManager->setup();
+		mBox2dManager = ParticleManager::create();
+		mBox2dManager->setup(gravity);
 	}
 
 	void KinectManager::setupParticleGrid()
@@ -86,6 +86,14 @@ namespace kinect {
 		gl::GlslProgRef solidShader = gl::getStockShader(gl::ShaderDef().color());
 		mCircleBatch = ci::gl::Batch::create(geom::Circle().radius(CIRCLE_RAD), solidShader);
 
+		//square
+		mSquareBatch = ci::gl::Batch::create(geom::Rect(), solidShader);
+
+		mSeed = clock() & 65535;
+		mOctaves = 8;
+		mFrequency = 1 / 200.0f;
+		mTimeSpeed = 0.8;
+		mTime = 0.0;
 	}
 
 	void KinectManager::updateKinect()
@@ -119,43 +127,47 @@ namespace kinect {
 
 	void KinectManager::updateParticlesBox2d()
 	{
-		mPhysicsManager->update();
+		mBox2dManager->update();
+
+		mBox2dManager->clean();
 	}
 
-	void KinectManager::drawParticleGrid(float colorR, float colorG, float colorB)
+	void KinectManager::drawParticleSquareGrid(float colorR, float colorG, float colorB)
 	{
 		mTime += mTimeSpeed;
 
 		mPerlin = Perlin(mOctaves, mSeed);
 		int i = 0;
 		int j = 0;
+
 		for (std::vector<contour::Particle>::iterator partIt = mParticles.begin(); partIt != mParticles.end(); ++partIt) {
 
-			if (!partIt->isActivated()){
-				float v = (mPerlin.fBm(vec3(j, i, mTime) * mFrequency) + 1.0f) / 2.0f;
+			//if (!partIt->isActivated()){
+			float v = (mPerlin.fBm(vec3(j, i, mTime) * mFrequency) + 1.0f) / 2.0f;
 
-				v *= v*v;
-				float val = v * 4;
+			v *= v*v;
+			float val = v * 4;
 
-				ci::ColorA perlinColor = ci::ColorA(val, val, val, val);
-				partIt->setVelColor(perlinColor);
-			}
+			ci::ColorA perlinColor = ci::ColorA(val, val, val, val);
+			partIt->setVelColor(perlinColor);
+			//}
 
-			//glPointSize(4.0 + partIt->getVelocity());
 			gl::pushModelMatrix();
 
 			ci::ivec2 pos = ci::ivec2(partIt->getPosition());
 			ci::ColorA outColor;
 
-				outColor = ci::ColorA(colorR, colorG, colorB, partIt->getVelColor().r);
-			
-			
+			outColor = ci::ColorA(colorR, colorG, colorB, partIt->getVelColor().r);
+
+
 			//ci::ColorA col = mBackgroundImg->getPixel(pos);
 
 			gl::ScopedColor cdol(outColor);
 			gl::translate(partIt->getPosition());
-			gl::scale(vec2(1.0 + partIt->getVelocity() / 2.0));
-			mCircleBatch->draw();
+			gl::scale(vec2(1.0 + partIt->getVelocity() / 1.5 + val*10));
+			
+			mSquareBatch->draw();
+
 			gl::popModelMatrix();
 
 			if (i >= mGridDims.x){
@@ -167,37 +179,191 @@ namespace kinect {
 
 	}
 
+	void KinectManager::drawParticlePointGrid(float colorR, float colorG, float colorB)
+	{
+		mTime += mTimeSpeed;
+
+		mPerlin = Perlin(mOctaves, mSeed);
+		int i = 0;
+		int j = 0;
+		for (std::vector<contour::Particle>::iterator partIt = mParticles.begin(); partIt != mParticles.end(); ++partIt) {
+
+			//if (!partIt->isActivated()){
+			float v = (mPerlin.fBm(vec3(j, i, mTime) * mFrequency) + 1.0f) / 2.0f;
+
+			v *= v*v;
+			float val = v * 4;
+
+			ci::ColorA perlinColor = ci::ColorA(val, val, val, val);
+			partIt->setVelColor(perlinColor);
+			//}
+
+			gl::pushModelMatrix();
+
+			ci::ivec2 pos = ci::ivec2(partIt->getPosition());
+			ci::ColorA outColor;
+
+			outColor = ci::ColorA(colorR, colorG, colorB, partIt->getVelColor().r);
+
+			//ci::ColorA col = mBackgroundImg->getPixel(pos);
+
+			gl::ScopedColor cdol(outColor);
+			gl::translate(partIt->getPosition());
+			gl::scale(vec2(1.0 + partIt->getVelocity() / 2.0 + partIt->getVelColor().r*3.0));
+			mCircleBatch->draw();
+			gl::popModelMatrix();
+
+			if (i >= mGridDims.x){
+				j++;
+				i = 0;
+			}
+			i++;
+		}
+	}
+
+
+	void KinectManager::drawParticleGrid(float colorR, float colorG, float colorB)
+	{
+		int limit = 0;
+
+		mTime += mTimeSpeed;
+		mPerlin = Perlin(mOctaves, mSeed);
+
+
+		for (int i = 0; i < mGridDims.y; i++){
+			gl::ScopedColor col(ci::ColorA(colorR, colorG, colorB, 1.0));
+			gl::VertBatch vertLine(GL_LINE_STRIP);
+
+			float v = (mPerlin.fBm(vec3(i / 2.0, i, mTime) * mFrequency) + 1.0f) / 2.0f;
+			v *= v*v;
+			float val = v * 4;
+			gl::ScopedLineWidth scpLineWidth(1.0f + v*8.0);
+
+			for (int j = limit; j < mGridDims.x - limit; j++){
+
+				ci::vec2 pos = mParticles.at(i*mGridDims.x + j).getPosition();
+				vertLine.vertex(pos);
+
+			}
+			vertLine.draw();
+		}
+
+
+		for (int i = 0; i < mGridDims.x; i++){
+
+			gl::VertBatch vertLine(GL_LINE_STRIP);
+			gl::ScopedColor col(ci::ColorA(colorR, colorG, colorB, 1.0));
+			//gl::ScopedColor col(ci::ColorA(1, 1, 1, 1.0));
+
+			float v = (mPerlin.fBm(vec3(i / 2.0, i, mTime) * mFrequency) + 1.0f) / 2.0f;
+			v *= v*v;
+			float val = v * 4;
+			gl::ScopedLineWidth scpLineWidth(1.0f + v*8.0);
+
+
+			for (int j = 0; j < mGridDims.y; j++){
+				ci::vec2 pos = mParticles.at(i + j*mGridDims.x).getPosition();
+				vertLine.vertex(pos);
+			}
+			vertLine.draw();
+		}
+	}
+
+
+	void KinectManager::drawParticlesLineV(float colorR, float colorG, float colorB)
+	{
+
+		int limit = 0;
+
+		mTime += mTimeSpeed;
+		mPerlin = Perlin(mOctaves, mSeed);
+
+
+		for (int i = 0; i < mGridDims.y; i++){
+			gl::ScopedColor col(ci::ColorA(colorR, colorG, colorB, 1.0));
+			gl::VertBatch vertLine(GL_LINE_STRIP);
+
+			float v = (mPerlin.fBm(vec3(i/2.0, i, mTime) * mFrequency) + 1.0f) / 2.0f;
+			v *= v*v;
+			float val = v * 4;
+
+			gl::ScopedLineWidth scpLineWidth(1.0 + val*7.0f);
+
+			for (int j = limit; j < mGridDims.x - limit; j++){
+
+				ci::vec2 pos = mParticles.at(i*mGridDims.x + j).getPosition();
+				vertLine.vertex(pos);
+
+			}
+			vertLine.draw();
+		}
+
+	}
+
+	void KinectManager::drawParticlesLineH(float colorR, float colorG, float colorB)
+	{
+
+		mTime += mTimeSpeed;
+		mPerlin = Perlin(mOctaves, mSeed);
+
+		for (int i = 0; i < mGridDims.x; i++){
+
+			gl::VertBatch vertLine(GL_LINE_STRIP);
+			gl::ScopedColor col(ci::ColorA(colorR, colorG, colorB, 1.0));
+
+			float v = (mPerlin.fBm(vec3(i, i/2.0, mTime) * mFrequency) + 1.0f) / 2.0f;
+			v *= v*v;
+			float val = v * 4;
+
+			gl::ScopedLineWidth scpLineWidth(1.0 + val*7.0f);
+
+			for (int j = 0; j < mGridDims.y; j++){
+				ci::vec2 pos = mParticles.at(i + j*mGridDims.x).getPosition();
+				vertLine.vertex(pos);
+			}
+			vertLine.draw();
+		}
+
+	}
+
 	void KinectManager::drawUpdateTriangulated(float colR, float colG, float colB)
 	{
 		//update contour with physics
 
-		mPhysicsManager->clean();
-
 		for (uint32_t i = 0; i < mDevices.size(); i++) {
 			Device & device = mDevices.at(i);
 
-			for (auto contourIt = device.mContours.begin(); contourIt != device.mContours.end(); ++contourIt) {
+			for (auto & contourIt : device.mContours) {
 
-				ci::TriMesh mesh = ci::Triangulator(contourIt->getShape()).calcMesh(ci::Triangulator::WINDING_ODD);
+				if (contourIt.getShapeSize() >= 3 && contourIt.getPoints().size() >= 3){
+					TriMesh mesh = Triangulator(contourIt.getShape()).calcMesh(Triangulator::WINDING_ODD);
 
-				if (mDrawTriangulatedContour && mesh.getNumVertices() > 3){
-					ci::gl::VboMeshRef	mVboMesh = ci::gl::VboMesh::create(mesh);
 
-					ci::gl::ScopedColor col(ci::ColorA(colR, colG, colB, 1));
-					ci::gl::enableWireframe();
-					ci::gl::draw(mVboMesh);
-					ci::gl::disableWireframe();
+					if (mesh.getNumVertices() > 3 && mDrawTriangulatedContour){
+						ci::gl::VboMeshRef	mVboMesh = ci::gl::VboMesh::create(mesh);
+
+						if (mVboMesh){
+							ci::gl::ScopedColor col(ci::ColorA(colR, colG, colB, 1.0f));
+							ci::gl::enableWireframe();
+							ci::gl::draw(mVboMesh);
+							ci::gl::disableWireframe();
+						}
+					}
+
+					mBox2dManager->addContourTriangulation(mesh);
 				}
-
-				mPhysicsManager->addContourTriangulation(mesh);
-
 			}
 		}
 	}
 
-	void KinectManager::drawParticlesBox2d()
+	void KinectManager::drawRaind(float colorR, float colorG, float colorB)
 	{
-		mPhysicsManager->draw();
+
+	}
+
+	void KinectManager::drawParticlesBox2d(ci::ColorA col)
+	{
+		mBox2dManager->draw(col);
 	}
 
 	void KinectManager::drawContours()
@@ -238,17 +404,17 @@ namespace kinect {
 
 	void KinectManager::addParticle(ci::vec2 & pos)
 	{
-		mPhysicsManager->addParticle(pos);
+		mBox2dManager->addParticle(pos);
 	}
 
 	void KinectManager::deleteParticle()
 	{
-		mPhysicsManager->deleteParticle();
+		mBox2dManager->deleteParticle();
 	}
 
 	int KinectManager::getParticleSize()
 	{
-		return mPhysicsManager->getNumParticles();
+		return mBox2dManager->getNumParticles();
 	}
 
 	void KinectManager::cleanUp()
@@ -328,8 +494,9 @@ namespace kinect {
 						if (dist < kInteractiveRadius) {
 							float amp = (1.0f - (dist / kInteractiveRadius)) * kInteractiveForce;
 							particle.addAcceleration(dir * amp);
-							particle.activateParticles();
+							particle.activateParticle();
 						}
+						
 
 						// Particle is inside contour
 						dir = closestPoint - particle.getPosition();
@@ -341,7 +508,7 @@ namespace kinect {
 							if (distance > 0.0f) {
 								float amp = (distance / kInteractiveRadius) * kInteractiveForce;
 								particle.addAcceleration(dir * amp);
-								particle.activateParticles();
+								particle.activateParticle();
 							}
 						}
 

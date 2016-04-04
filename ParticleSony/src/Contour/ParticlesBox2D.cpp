@@ -8,7 +8,7 @@ namespace physics{
 	using namespace std;
 
 	ParticleBox::ParticleBox(const b2Body* b) :
-		b2b(b), mDead(false)
+		b2b(b), mDead(false), mType(0)
 	{
 		life = ci::randFloat(80, 140);
 	}
@@ -32,11 +32,11 @@ namespace physics{
 
 	///////////////////////////////////////////////////////////////
 
-	void ParticleManager::setup()
+	void ParticleManager::setup(ci::vec2 gravityWind)
 	{
-
+		mParticleCounter = 0;
 		//setup the world
-		b2Vec2 gravity(0.5f, 3.3f);
+		b2Vec2 gravity(gravityWind.x, gravityWind.y);
 		mWorld = new b2World(gravity);
 
 		b2BodyDef groundBodyDef;
@@ -45,13 +45,6 @@ namespace physics{
 
 		// Define the ground box shape.
 		//b2PolygonShape groundBox;
-
-		// The extents are the half-widths of the box.
-		//groundBox.SetAsBox(ci::app::getWindowWidth(), ci::app::getWindowHeight());
-
-		// Add the ground fixture to the ground body.
-		//groundBody->CreateFixture(&groundBox, 0.0f);
-
 
 		b2EdgeShape groundBox;
 		// bottom
@@ -79,38 +72,131 @@ namespace physics{
 		catch (std::exception e){
 			CI_LOG_I("cannot load particle image");
 		}
+
+		//circle
+		gl::GlslProgRef solidShader = gl::getStockShader(gl::ShaderDef().color());
+		mCircleBatch = ci::gl::Batch::create(geom::Circle().radius(1).subdivisions(16), solidShader);
+
+		//Square
+		mSquareBatch = ci::gl::Batch::create(geom::Rect(), solidShader);
+
+		mTriangleBatch = ci::gl::Batch::create(geom::Circle().radius(1).subdivisions(2), solidShader);
+
 	}
 
-	void ParticleManager::draw()
+	void ParticleManager::draw(ci::ColorA col)
 	{
 		//iterate through the boxes
-		for (auto & particleBox : mBoxes){
-			//b2Body * b2b = particleBox->getB2Body();
-			const b2Body * b2b = particleBox->getB2Body();
 
-			particleBox->update();
-			float vel = (abs(b2b->GetLinearVelocity().x) + abs(b2b->GetLinearVelocity().y));
+		switch (mDrawMode){
+	
+		//only circle
+		case 0:
+		{
+			int boxIndex = 0;
+			for (auto & particleBox : mBoxes){
+				const b2Body * b2b = particleBox->getB2Body();
 
-			ci::gl::ScopedMatrices mat;
-			ci::gl::ScopedModelMatrix model;
-			ci::gl::translate(b2b->GetPosition().x, b2b->GetPosition().y);
-			ci::gl::rotate(b2b->GetAngle());
+				particleBox->update();
+				float vel = (abs(b2b->GetLinearVelocity().x) + abs(b2b->GetLinearVelocity().y));
 
-			//ci::gl::ScopedColor color(ci::ColorA(0.7 + vel * 2, 0.7 + vel * 2, 0.7 + vel * 2, 0.8 + vel * 3));
-			ci::gl::ScopedColor colo(ci::ColorA(0.95, 0.95, 0.95, 1.0));
-			//ci::gl::drawSolidRect(ci::Rectf(-BOX_SIZE, -BOX_SIZE, BOX_SIZE, BOX_SIZE));
+				float size = particleBox->getSize();
+				float sizeM = size / 2.0;
+				ci::gl::ScopedMatrices mat;
+				ci::gl::ScopedModelMatrix model;
+				ci::gl::translate(b2b->GetPosition().x + sizeM, b2b->GetPosition().y + sizeM);
+				ci::gl::rotate(b2b->GetAngle());
+				ci::gl::scale(ci::vec2(size * 2));
 
-			//ci::gl::scale(4.5, 4.5);
-			//ci::gl::draw(mTexture, ci::Rectf(0, 0, particleBox->getSize() / 2.2f, particleBox->getSize() / 2.2f));
-			ci::gl::drawSolidCircle(ci::vec2(0), particleBox->getSize() + 2);
-			//ci::gl::drawSolidCircle(ci::vec2(b2b->GetPosition().x, b2b->GetPosition().y), 5);
-			//particleBox->draw();
+				//ci::gl::ScopedColor color(ci::ColorA(col.r + vel, col.g + vel * 2, col.b + vel * 2, 0.8));
+				ci::gl::ScopedColor color(col);
 
-			//ci::app::console() << b2b->GetPosition().x << b2b->GetPosition().y << std::endl;
+				mSquareBatch->draw();
+
+				if (particleBox->isDead()){
+					mDeleteIndex.insert(std::pair<int, int>(particleBox->getId(), boxIndex));
+				}
+				boxIndex++;
+			}
+		}
+		break;
+
+		//only square
+		case 1:
+		{
+			int boxIndex = 0;
+			for (auto & particleBox : mBoxes){
+				const b2Body * b2b = particleBox->getB2Body();
+
+				particleBox->update();
+				float vel = (abs(b2b->GetLinearVelocity().x) + abs(b2b->GetLinearVelocity().y));
+
+				float size = particleBox->getSize();
+				float sizeM = size / 2.0;
+				ci::gl::ScopedMatrices mat;
+				ci::gl::ScopedModelMatrix model;
+				ci::gl::translate(b2b->GetPosition().x + sizeM, b2b->GetPosition().y + sizeM);
+				ci::gl::rotate(b2b->GetAngle());
+				ci::gl::scale(ci::vec2(size * 2));
+
+				//ci::gl::ScopedColor color(ci::ColorA(col.r + vel, col.g + vel * 2, col.b + vel * 2, 0.8));
+				
+				ci::gl::ScopedColor color(col);
+
+				mCircleBatch->draw();
+
+				if (particleBox->isDead()){
+					mDeleteIndex.insert(std::pair<int, int>(particleBox->getId(), boxIndex));
+				}
+				boxIndex++;
+			}
+		}
+		break;
+
+		//random figure
+		case 2:
+		{
+			int boxIndex = 0;
+			for (auto & particleBox : mBoxes){
+				const b2Body * b2b = particleBox->getB2Body();
+
+				particleBox->update();
+				float vel = (abs(b2b->GetLinearVelocity().x) + abs(b2b->GetLinearVelocity().y)) / 3.0f;
+
+				float size = particleBox->getSize();
+				float sizeM = size / 2.0;
+				ci::gl::ScopedMatrices mat;
+				ci::gl::ScopedModelMatrix model;
+				ci::gl::translate(b2b->GetPosition().x + sizeM, b2b->GetPosition().y + sizeM);
+				ci::gl::rotate(b2b->GetAngle());
+				ci::gl::scale(ci::vec2(size * 1.8));
+
+				ci::gl::ScopedColor color(col);
+
+
+				if (particleBox->getType() == 0){
+					mCircleBatch->draw();
+				}
+				else if (particleBox->getType() == 1){
+					mSquareBatch->draw();
+				}
+				else{
+					mTriangleBatch->draw();
+				}
+
+
+				if (particleBox->isDead()){
+					mDeleteIndex.insert(std::pair<int, int>(particleBox->getId(), boxIndex));
+				}
+				boxIndex++;
+			}
+		}
+		break;
 
 		}
 	}
 
+	//update particles
 	void ParticleManager::update()
 	{
 		for (int i = 0; i < 5; ++i){
@@ -118,6 +204,7 @@ namespace physics{
 		}
 	}
 
+	//clean particles
 	void ParticleManager::clean()
 	{
 
@@ -164,6 +251,7 @@ namespace physics{
 		//CI_LOG_I("FINISH CLEANING");
 	}
 
+	//create a box2d mesh using as input a Trimesh format
 	void ParticleManager::addContourTriangulation(ci::TriMesh & mesh)
 	{
 		//CI_LOG_I("START CONTOUR");
@@ -174,7 +262,6 @@ namespace physics{
 				try{
 
 					// Get a single triangle from the mesh.
-
 					vec2 v0(0), v1(0), v2(0);
 					mesh.getTriangleVertices(i, &v0, &v1, &v2);
 
@@ -200,9 +287,9 @@ namespace physics{
 						fixtureDef.restitution = 0.0f;
 
 						b2PolyBody->CreateFixture(&fixtureDef);
-
 						mPolygons.push_back(b2PolyBody);
 					}
+					
 				}
 				catch (Exception & e){
 					CI_LOG_I("Polygon: " << e.what());
@@ -224,26 +311,41 @@ namespace physics{
 				ParticleBoxRef  particle = ParticleBox::create(mWorld->CreateBody(&bodyDef));
 
 				particle->setInitPos(pos);
-				float size = ci::randInt(6, 6);
+				float size = ci::randInt(10, 24);
 				particle->setSize(size);
 
+				particle->setId(mParticleCounter);
+
+				//set type of the particle, circle, rect or triange
+				float rand = ci::randFloat(1);
+				if (rand < 0.3){
+					particle->setType(0);
+				}
+				else if (rand > 0.3 && rand < 0.6){
+					particle->setType(1);
+				}
+				else{
+					particle->setType(2);
+				}
 
 				b2PolygonShape dynamicBox;
 				dynamicBox.SetAsBox(size, size);
 
 				b2FixtureDef fixtureDef;
 				fixtureDef.shape = &dynamicBox;
-				fixtureDef.density = ci::randFloat(0.5, 0.9);
-				fixtureDef.friction = ci::randFloat(0.06, 0.09);
-				fixtureDef.restitution = ci::randFloat(0.23, 0.4); // bounce
+
+				//Change particle dynamics
+				fixtureDef.density = ci::randFloat(0.4, 0.9);
+				fixtureDef.friction = ci::randFloat(0.07, 0.09);
+				fixtureDef.restitution = ci::randFloat(0.2, 0.5); // bounce
 
 				b2Body * body = const_cast<b2Body*>(particle->getB2Body());
 
 				if (body != NULL){
-
 					body->CreateFixture(&fixtureDef);
-
 					mBoxes.push_back(particle);
+
+					mParticleCounter++;
 				}
 			}
 			else{

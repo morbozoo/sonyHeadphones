@@ -258,6 +258,7 @@
     <ClInclude Include="..\src\Kinect\KinectManager.h" />
     <ClInclude Include="..\src\ParticleSonyApp.h" />
     <ClInclude Include="..\src\Shaders\Bloom.h" />
+    <ClInclude Include="..\src\Shaders\Stencil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

@@ -47,7 +47,7 @@
 
 
 
-#include "../blocks/KinectSdk/src/Kinectv1.h"
+#include "Kinectv1.h"
 
 #include "../Contour/ParticleContour.h"
 #include "../Contour/ParticlesBox2D.h"
@@ -64,9 +64,9 @@ namespace kinect {
 
 
 	//particle grid
-	const float kPointSpacing = 11.0f;
-	const float kInteractiveForce = 0.8f;
-	const float kInteractiveRadius = 80.0f;
+	const float kPointSpacing = 14.0f;
+	const float kInteractiveForce = 0.9f;
+	const float kInteractiveRadius = 70.0f;
 	const float kFloatMax = std::numeric_limits<float>::max();
 
 	//smart pointer 
@@ -84,7 +84,7 @@ namespace kinect {
 		void cleanUp();
 
 		void setupKinect();
-		void setupPhysics();
+		void setupPhysics(ci::vec2 gravity);
 		void setupParticleGrid();
 
 		//Kinect
@@ -93,13 +93,23 @@ namespace kinect {
 
 		//contour
 		void updateParticlesBox2d();
-		void drawParticlesBox2d();
+		void drawParticlesBox2d(ci::ColorA col);
 		void drawContours();
 		void drawUpdateTriangulated(float colR, float colG, float colB);
 
+		void setBox2dDrawMode(int value){ mBox2dManager->setDrawMode(value); }
+
 
 		//particles grid
-		void drawParticleGrid(float colorR, float coloG, float colorB);
+		void drawParticlePointGrid(float colorR, float colorG, float colorB);
+		void drawParticleSquareGrid(float colorR, float colorG, float colorB);
+		void drawParticleGrid(float colorR, float colorG, float colorB);
+		void drawParticlesLineH(float colorR, float colorG, float colorB);
+		void drawParticlesLineV(float colorR, float colorG, float colorB);
+
+		//Rain
+		void drawRaind(float colorR, float colorG, float colorB);
+
 		void updateParticleGrid();
 
 
@@ -109,12 +119,13 @@ namespace kinect {
 
 		int getNumKinects(){ return mDevices.size(); }
 
+		void setTimePerlin(float value){ mTimeSpeed = value; }
 
 
 		bool									mDrawTriangulatedContour;
 
 	private:
-		ParticleManagerRef					    mPhysicsManager;
+		ParticleManagerRef					    mBox2dManager;
 
 
 		// Device info
@@ -163,7 +174,7 @@ namespace kinect {
 		//Circle batch
 		ci::gl::BatchRef						mCircleBatch;
 
-
+		ci::gl::BatchRef						mSquareBatch;
 		
 	};
 }

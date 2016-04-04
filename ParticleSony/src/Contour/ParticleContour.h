@@ -21,9 +21,9 @@ namespace contour{
 
 		void				update();
 
-		void				activateParticles(){
-			mActivated = true;
-		}
+		void				activateParticle(){mActivated = true;}
+
+		void				deactivateParticle(){ mActivated = false; }
 
 		void addIncrement(float & val){ mCosInc = val; }
 

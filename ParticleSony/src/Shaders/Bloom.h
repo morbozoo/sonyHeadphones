@@ -10,6 +10,7 @@
 #include "cinder/gl/Fbo.h"
 #include "cinder/gl/GlslProg.h"
 #include "cinder/app/App.h"
+#include "cinder/Log.h"
 
 
 namespace shaders{
@@ -39,6 +40,10 @@ namespace shaders{
 		void                setAttenuation(float v){ attenuationBloom = v; }
 
 		ci::gl::FboRef      getFBOScene(){ return mFboScene; }
+
+		ci::Area			getBounds(){ return bloomBounds; }
+
+		ci::vec2			getSize(){ return bloomDims; }
 	protected:
 		float               attenuationBloom;
 

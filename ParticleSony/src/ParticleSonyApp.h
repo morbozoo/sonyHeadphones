@@ -65,11 +65,10 @@
 #include <boost/date_time/local_time_adjustor.hpp>
 #include <boost/date_time/c_local_time_adjustor.hpp>
 
-#include "../blocks/Spout/include/Spout.h"
+#include "Spout.h"
 //#include "../blocks/OSC/src/Osc.h"
 #include "OscSender.h"
 #include "OscListener.h"
-
 
 
 //spout
@@ -97,6 +96,13 @@ public:
 	void								updateMode();
 	void								drawMode();
 
+
+	//box2d
+	void								updateBox2D();
+	void								drawBox2D();
+
+	void								offScreenRendering();
+
 	static ci::fs::path findPath(const ci::fs::path & folder);
 
 private:
@@ -108,23 +114,26 @@ private:
 	bool								mDrawContours;
 	int									mDrawMode;
 	int									mNumKinects;
+	ci::ColorA							mBkgColor;
 	
 
 	//Kinect Manager
 	kinect::KinectManagerRef			mKinectManagerRef;
-	int									numParticles;
-	int									numParticlesBox2d;
-	int									rateParticles;
-	int									maxNumParticles;
-	int									changeColor;
+	int									mNumParticles;
+	int									mNumParticlesBox2d;
+	int									mRateParticles;
+	int									mMaxNumParticles;
+	int									mChangeColor;
+	float								mPerlinValue;
 
-
+	//Bloom
 	shaders::BloomRef					mBloom;
 	float								mBloomFactor;
+	bool								mEnableBloom;
 
 	float								mTimeStep;
 
-
+	//SPOUT
 	void setupSpout();
 	void sendSpout();
 	SpoutSender spoutsender;					// Create a Spout sender object
@@ -134,10 +143,11 @@ private:
 	char SenderName[256];
 	ci::gl::Texture2dRef spoutTexture;				// Local Cinder texture used for sharing
 
+
 	//Change color
-	
 	void timeColor(float colR, float colG, float colB);
-	float duration;
+	float mDuration;
+
 	ci::Color   mColor;
 	ci::Anim<float>   colorR;
 	ci::Anim<float>   colorG;
