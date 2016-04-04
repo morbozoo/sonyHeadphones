@@ -99,7 +99,14 @@ namespace kinect {
 
 
 		//particles grid
-		void drawParticleGrid(float colorR, float coloG, float colorB);
+		void drawParticlePointGrid(float colorR, float colorG, float colorB);
+		void drawParticleGrid(float colorR, float colorG, float colorB);
+		void drawParticlesLineH(float colorR, float colorG, float colorB);
+		void drawParticlesLineV(float colorR, float colorG, float colorB);
+
+		//Rain
+		void drawRaind(float colorR, float colorG, float colorB);
+
 		void updateParticleGrid();
 
 

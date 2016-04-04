@@ -113,17 +113,26 @@ namespace contour{
 				int32_t i = 0;
 
 				contour.mShape.clear();
+				contour.mNumPointsShape = 0;
 				for (vector<cv::Point>::const_iterator pointIt = contourIt->cbegin(); pointIt != contourIt->cend(); ++pointIt, i++) {
+					
 					if (smoothing == 0 || i % smoothing == 0) {
 						vec2 point((float)pointIt->x, (float)pointIt->y);
 						contour.addPoint(point);
 						contour.addDepth(channel.getValue(point));
 
 						//fill shape strucutre
-						if (i == 0){
-							contour.mShape.moveTo(point);
+						if (smoothing == 0 || i % 5 == 0) {
+							if (i == 0){
+								contour.mShape.moveTo(point);
+								contour.mNumPointsShape++;
+							}
+							else{
+								contour.mShape.lineTo(point);
+								contour.mNumPointsShape++;
+							}
 						}
-						contour.mShape.lineTo(point);
+						
 					}
 				}
 
@@ -166,7 +175,8 @@ namespace contour{
 				// points to simplify the outline for faster tracking.
 				int32_t i = 0;
 
-				//contour.mShape.clear();
+				contour.mShape.clear();
+				contour.mNumPointsShape = 0;
 				for (vector<cv::Point>::const_iterator pointIt = contourIt->cbegin(); pointIt != contourIt->cend(); ++pointIt, i++) {
 					if (smoothing == 0 || i % smoothing == 0) {
 						vec2 point((float)pointIt->x, (float)pointIt->y);
@@ -179,11 +189,15 @@ namespace contour{
 
 						//fill shape strucutre
 
-						if (i == 0){
-							contour.mShape.moveTo(point);
-						}
-						else {
-							contour.mShape.lineTo(point);
+						if (smoothing == 0 || i % 5 == 0) {
+							if (i == 0){
+								contour.mShape.moveTo(point);
+								contour.mNumPointsShape++;
+							}
+							else{
+								contour.mShape.lineTo(point);
+								contour.mNumPointsShape++;
+							}
 						}
 					}
 				}

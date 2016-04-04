@@ -8,23 +8,27 @@
 #include "Bloom.h"
 
 namespace shaders{
+
+	using namespace std;
+
 	void Bloom::setupBlur(ci::vec2 dims)
 	{
 		
-		ci::gl::Texture2d::Format texFormat = ci::gl::Texture2d::Format();
-		texFormat.enableMipmapping(false);
-		texFormat.setWrap(GL_CLAMP_TO_BORDER_ARB, GL_CLAMP_TO_BORDER_ARB);
+		//ci::gl::Texture2d::Format texFormat = ci::gl::Texture2d::Format();
+		//texFormat.enableMipmapping(false);
+		//texFormat.setWrap(GL_CLAMP_TO_BORDER_ARB, GL_CLAMP_TO_BORDER_ARB);
 
-		ci::gl::Fbo::Format format = ci::gl::Fbo::Format();
-		format.setColorTextureFormat(texFormat);
+		//ci::gl::Fbo::Format format = ci::gl::Fbo::Format();
+		//format.setColorTextureFormat(texFormat);
+
+		ci::gl::Fbo::Format fmt;
+		fmt.setSamples(8);
+		fmt.setCoverageSamples(8);
 		
-		mFboBlur1 = ci::gl::Fbo::create(dims.x / 4.0f, dims.y / 4.0f, format);
-		mFboBlur2 = ci::gl::Fbo::create(dims.x / 4.0f, dims.y / 4.0f, format);
+		mFboBlur1 = ci::gl::Fbo::create(dims.x / 4.0f, dims.y / 4.0f, fmt);
+		mFboBlur2 = ci::gl::Fbo::create(dims.x / 4.0f, dims.y / 4.0f, fmt);
 
-		format.setCoverageSamples(16);
-		format.setSamples(4);
-
-		mFboScene = ci::gl::Fbo::create(dims.x / 1.0f, dims.y / 1.0f, format);
+		mFboScene = ci::gl::Fbo::create(dims.x / 1.0f, dims.y / 1.0f, fmt);
 
 		this->bloomDims = dims;
 		this->bloomBounds = ci::Area(0, 0, dims.x, dims.y);
@@ -44,9 +48,10 @@ namespace shaders{
 
 	void Bloom::bindFboScene()
 	{
-
 		mFboScene->bindFramebuffer();
-		ci::gl::viewport(ci::vec2(0), mFboScene->getSize());
+		//ci::gl::viewport(ci::vec2(0), mFboScene->getSize());
+		//ci::gl::setMatricesWindow(mFboScene->getSize());
+
 	}
 
 	void Bloom::unbindFboScene()
@@ -56,50 +61,55 @@ namespace shaders{
 
 	void Bloom::updateBlur()
 	{
-		
+		ci::gl::pushMatrices();
+
 		ci::gl::ScopedGlslProg scpGlsl(mShaderBlur);
 		mShaderBlur->uniform("tex0", 0);
 		mShaderBlur->uniform("sample_offset", ci::vec2(1.0f / mFboBlur1->getWidth(), 0.0f));
 		mShaderBlur->uniform("attenuation", attenuationBloom);
 
 		{
-			mFboBlur1->bindFramebuffer();
-			mFboScene->bindTexture(0);
+			ci::gl::ScopedFramebuffer fbo(mFboBlur1);
 			ci::gl::ScopedViewport(ci::vec2(0), mFboBlur1->getSize());
+			ci::gl::ScopedTextureBind tex(mFboScene->getColorTexture(), 0);
+
+			ci::gl::setMatricesWindow(mFboBlur1->getSize());
 			ci::gl::clear(ci::Color::black());
 			ci::gl::drawSolidRect(bloomBounds);
-			mFboScene->unbindTexture();
-			mFboBlur1->unbindFramebuffer();
 		}
 
 		mShaderBlur->uniform("sample_offset", ci::vec2(0.0f, 1.0f / mFboBlur2->getHeight()));
 		mShaderBlur->uniform("attenuation", attenuationBloom);
 
 		{
-			mFboBlur2->bindFramebuffer();
-			mFboBlur1->bindTexture(0);
-			ci::gl::ScopedViewport(ci::vec2(0), mFboBlur2->getSize());
+
+			ci::gl::ScopedFramebuffer fbo(mFboBlur2);
+			ci::gl::ScopedViewport viewport(ci::vec2(0), mFboBlur2->getSize());
+			ci::gl::ScopedTextureBind tex(mFboBlur1->getColorTexture(), 0);
+
 	
+			ci::gl::setMatricesWindow(mFboBlur2->getSize());
 			ci::gl::clear(ci::Color::black());
+
 			ci::gl::drawSolidRect(bloomBounds);
-			mFboBlur1->unbindTexture();
-			mFboBlur2->unbindFramebuffer();
+
 		}
 
-		ci::gl::viewport(ci::vec2(0), bloomBounds.getSize());
+		ci::gl::popMatrices();
 	}
 
 	void Bloom::drawBlur()
 	{
+
 		ci::gl::pushModelView();
-		ci::gl::translate(ci::vec2(0, bloomDims.y));
-		ci::gl::scale(ci::vec3(1, -1, 1));
 		ci::gl::color(ci::Color::white());
 		ci::gl::draw(mFboScene->getColorTexture(), bloomBounds);
 
+		/*
 		ci::gl::enableAdditiveBlending();
 		ci::gl::draw(mFboBlur2->getColorTexture(), bloomBounds);
 		ci::gl::disableAlphaBlending();
 		ci::gl::popModelView();
+		*/
 	}
 }

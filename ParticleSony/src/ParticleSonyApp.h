@@ -71,7 +71,6 @@
 #include "OscListener.h"
 
 
-
 //spout
 //#include "Spout.h
 
@@ -97,6 +96,8 @@ public:
 	void								updateMode();
 	void								drawMode();
 
+	void								offScreenRendering();
+
 	static ci::fs::path findPath(const ci::fs::path & folder);
 
 private:
@@ -112,19 +113,20 @@ private:
 
 	//Kinect Manager
 	kinect::KinectManagerRef			mKinectManagerRef;
-	int									numParticles;
-	int									numParticlesBox2d;
-	int									rateParticles;
-	int									maxNumParticles;
-	int									changeColor;
+	int									mNumParticles;
+	int									mNumParticlesBox2d;
+	int									mRateParticles;
+	int									mMaxNumParticles;
+	int									mChangeColor;
 
-
+	//Bloom
 	shaders::BloomRef					mBloom;
 	float								mBloomFactor;
+	bool								mEnableBloom;
 
 	float								mTimeStep;
 
-
+	//SPOUT
 	void setupSpout();
 	void sendSpout();
 	SpoutSender spoutsender;					// Create a Spout sender object
@@ -134,10 +136,11 @@ private:
 	char SenderName[256];
 	ci::gl::Texture2dRef spoutTexture;				// Local Cinder texture used for sharing
 
+
 	//Change color
-	
 	void timeColor(float colR, float colG, float colB);
-	float duration;
+	float mDuration;
+
 	ci::Color   mColor;
 	ci::Anim<float>   colorR;
 	ci::Anim<float>   colorG;

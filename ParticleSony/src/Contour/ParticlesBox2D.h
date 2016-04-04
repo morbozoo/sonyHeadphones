@@ -75,6 +75,7 @@ namespace physics{
 		const b2Body * getB2Body(){ return b2b; }
 
 
+
 		void setInitPos(ci::vec2 & pos){ mInitPos = pos; }
 		ci::vec2 getInitPos(){ return mInitPos; }
 
@@ -85,6 +86,9 @@ namespace physics{
 
 		bool			isDead(){ return mDead; }
 
+		void			setId(int id){ mId = id; }
+		int				getId(){ return mId; }
+
 	private:
 
 		//body particle, manages all the physics, collisions
@@ -93,7 +97,9 @@ namespace physics{
 		ci::vec2					mInitPos;
 		float						mSize;
 		float						life;
+
 		bool						mDead;
+		int							mId;
 
 	};
 
@@ -114,7 +120,9 @@ namespace physics{
 		}
 
 		void setup();
+
 		void draw();
+
 		void update();
 
 		void clean();
@@ -135,5 +143,16 @@ namespace physics{
 		std::map<int, int>					mDeleteIndex;
 
 		ci::gl::Texture2dRef				mParticleTexture;
+		int									mParticleCounter;
+
+
+		int									mDrawMode;
+
+		//Circle batch
+		ci::gl::BatchRef					mCircleBatch;
+
+		ci::gl::BatchRef					mSquareBatch;
+
+		ci::gl::BatchRef					mTriangleBatch;
 	};
 }

@@ -28,6 +28,8 @@ namespace contour{
 
 		ci::Shape2d						getShape(){ return mShape; }
 
+		int								getShapeSize(){ return mNumPointsShape; }
+
 	private:
 		void							addPoint(const ci::vec2 &position);
 		void							addDepth(float depth);
@@ -37,6 +39,8 @@ namespace contour{
 		std::vector<float>				mDepth;
 
 		ci::Shape2d						mShape;
+
+		int								mNumPointsShape;
 
 		friend class					ContourFinder;
 	};

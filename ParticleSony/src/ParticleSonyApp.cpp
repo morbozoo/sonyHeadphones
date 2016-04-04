@@ -75,6 +75,7 @@ void ParticleSonyApp::setup()
 
 	//BLOMM
 	mBloom = shaders::Bloom::create();
+	mBloom->setAttenuation(1.5);
 	mBloom->setupBlur(getWindowSize());
 	mBloom->compileShader();
 
@@ -82,14 +83,14 @@ void ParticleSonyApp::setup()
 	mBloomFactor = .6;
 
 	//draw type
-	mDrawMode = 0;
+	mDrawMode = 1;
 
-//	mTimeStep = SystemVars::getInstance().speed_w;
-
-	rateParticles = 150;
-	maxNumParticles = 300;
-	changeColor = 0;
-	duration = 2.0f;
+	//init values
+	mRateParticles	 = 15;
+	mMaxNumParticles = 300;
+	mChangeColor	 = 0;
+	mDuration		 = 1.0f;
+	mEnableBloom	 = false;
 
 	mNumKinects = mKinectManagerRef->getNumKinects();
 	CI_LOG_I("NUM KINECTS CREATED " << mNumKinects);
@@ -100,25 +101,28 @@ void ParticleSonyApp::setup()
 	mParams->addSeparator();
 	//mParams->addParam("draw depth", &mKinectManagerRef->mDrawDepths, "");
 	mParams->addParam("draw contours", &mDrawContours, "");
-	mParams->addParam("draw Type", &mDrawMode).step(1).min(0).max(2);
+	mParams->addParam("draw Type", &mDrawMode).step(1).min(0).max(5);
 	
 
 	//mParams->addParam("draw Grid", &mKinectManagerRef->mDrawGrid, "");
 	mParams->addParam("Speed Background", &mTimeStep, "min=0 max=10 step=0.1");
+
+	mParams->addParam("Enable Bloom", &mEnableBloom);
 	mParams->addParam("Bloom Att", &mBloomFactor, "min=0 max=2 step=0.01");
 	mParams->addSeparator();
 
-	mParams->addParam("Particle rate", &rateParticles, "min=1 max=150 step=1");
-	mParams->addParam("Max number particles", &maxNumParticles, "min=3 max=1000 step=1");
-	mParams->addParam("Change Color", &changeColor, "min=0 max=1 step=1");
-	mParams->addParam("duration", &duration, "min=0.5 max=5.0 step=0.1");
+	mParams->addParam("Particle rate", &mRateParticles, "min=1 max=150 step=1");
+	mParams->addParam("Max number particles", &mMaxNumParticles, "min=3 max=1000 step=2");
+	mParams->addParam("Change Color", &mChangeColor, "min=0 max=1 step=1");
+	mParams->addParam("duration", &mDuration, "min=0.5 max=5.0 step=0.1");
 
 	////	mParams->addParam("Scale Contour X", &mKinectManagerRef->mScaleContour.x, "min=0 max=15 step=0.01");
 	////	mParams->addParam("Scale Contour Y", &mKinectManagerRef->mScaleContour.y, "min=0 max=15 step=0.01");
 	//mParams->addParam("Kinect Translate Y", &mKinectManagerRef->mKinectTranslateY, "min=-450 max=450 step=1");
-	colorR = 0;
-	colorG = 0;
-	colorB = 0;
+
+	colorR = 1.0f;
+	colorG = 1.0f;
+	colorB = 1.0f;
 
 	setupOsc();
 
@@ -133,23 +137,45 @@ void ParticleSonyApp::updateMode()
 	case 0:
 		mKinectManagerRef->updateParticlesBox2d();
 
-		numParticlesBox2d = mKinectManagerRef->getParticleSize();
+		mNumParticlesBox2d = mKinectManagerRef->getParticleSize();
 
-		if (getElapsedFrames() % rateParticles == 0){
+		if (getElapsedFrames() % mRateParticles == 0){
 			float x = ci::randFloat(60, getWindowWidth() - 80);
 			float y = 150;
 			mKinectManagerRef->addParticle(ci::vec2(x, y));
 		}
 
-		while (mKinectManagerRef->getParticleSize() > maxNumParticles){
+		while (mKinectManagerRef->getParticleSize() > mMaxNumParticles){
 			mKinectManagerRef->deleteParticle();
 		}
 
 		break;
 	case 1:
-
 		mKinectManagerRef->updateParticleGrid();
 		break;
+	case 2:
+		mKinectManagerRef->updateParticleGrid();
+		break;
+	case 3:
+		mKinectManagerRef->updateParticleGrid();
+		break;
+	case 4:
+		mKinectManagerRef->updateParticleGrid();
+		break;
+	}
+}
+
+
+//--- offscreen rendering
+void ParticleSonyApp::offScreenRendering()
+{
+
+	mBloom->bindFboScene();
+	drawMode();
+	mBloom->unbindFboScene();
+
+	if (mEnableBloom){
+		mBloom->updateBlur();
 	}
 }
 
@@ -162,25 +188,32 @@ void ParticleSonyApp::update()
 
 	mKinectManagerRef->updateKinect();
 	
+	mNumKinects = mKinectManagerRef->getNumKinects();
 
+	//update modes
 	updateMode();
 
-	
-	mNumKinects  = mKinectManagerRef->getNumKinects();
-
+	//offscreen rendering
+	offScreenRendering();
 }
 
 
 void ParticleSonyApp::timeColor(float colR, float colG, float colB) 
 {
-	timeline().apply(&colorR, colR, duration, EaseInCubic());
-	timeline().apply(&colorG, colG, duration, EaseInCubic());
-	timeline().apply(&colorB, colB, duration, EaseInCubic());
-
+	timeline().apply(&colorR, colR, mDuration, EaseInCubic());
+	timeline().apply(&colorG, colG, mDuration, EaseInCubic());
+	timeline().apply(&colorB, colB, mDuration, EaseInCubic());
 }
 
 void ParticleSonyApp::drawMode()
 {
+
+	gl::ScopedViewport scpView(ci::vec2(0), mBloom->getSize());
+	gl::setMatricesWindow(mBloom->getSize());
+	ci::gl::setModelMatrix(ci::mat4());
+	
+	gl::clear();
+
 	switch (mDrawMode){
 
 	case 0:
@@ -193,7 +226,16 @@ void ParticleSonyApp::drawMode()
 		break;
 
 	case 1:
+		mKinectManagerRef->drawParticlePointGrid(colorR, colorG, colorB);
+		break;
+	case 2:
 		mKinectManagerRef->drawParticleGrid(colorR, colorG, colorB);
+		break;
+	case 3:
+		mKinectManagerRef->drawParticlesLineH(colorR, colorG, colorB);
+		break;
+	case 4:
+		mKinectManagerRef->drawParticlesLineV(colorR, colorG, colorB);
 		break;
 	}
 }
@@ -204,11 +246,22 @@ void ParticleSonyApp::draw()
 
 	gl::clear(Color(0, 0, 0));
 
-	gl::ScopedViewport scpVp(ivec2(0), getWindowSize());
-	gl::ScopedMatrices matrices;
-	ci::gl::setMatricesWindow(getWindowSize(), true);
-	ci::gl::setModelMatrix(ci::mat4());
-	drawMode();
+
+	if (mEnableBloom){
+		mBloom->drawBlur();
+	}
+	else{
+		ci::gl::pushModelView();
+
+		gl::ScopedViewport scpView(ci::vec2(0), getWindowSize());
+		gl::setMatricesWindow(getWindowSize());
+		ci::gl::setModelMatrix(ci::mat4());
+
+		ci::gl::color(ci::Color::white());
+		ci::gl::draw(mBloom->getFBOScene()->getColorTexture(), getWindowSize());
+
+		ci::gl::popModelView();
+	}
 
 	if (mDrawGUI)
 		mParams->draw();

@@ -39,6 +39,10 @@ namespace shaders{
 		void                setAttenuation(float v){ attenuationBloom = v; }
 
 		ci::gl::FboRef      getFBOScene(){ return mFboScene; }
+
+		ci::Area			getBounds(){ return bloomBounds; }
+
+		ci::vec2			getSize(){ return bloomDims; }
 	protected:
 		float               attenuationBloom;
 
