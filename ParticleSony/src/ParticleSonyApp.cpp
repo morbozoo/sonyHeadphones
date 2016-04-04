@@ -85,7 +85,7 @@ void ParticleSonyApp::setup()
 	mBloom->compileShader();
 
 	mDrawGUI = true;
-	mBloomFactor = .6;
+	mBloomFactor = 0.6;
 
 	//draw type
 	mDrawMode = 1;

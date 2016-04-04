@@ -209,7 +209,7 @@ namespace kinect {
 
 			gl::ScopedColor cdol(outColor);
 			gl::translate(partIt->getPosition());
-			gl::scale(vec2(1.0 + partIt->getVelocity() / 2.0) + partIt->getVelColor().r*10);
+			gl::scale(vec2(1.0 + partIt->getVelocity() / 2.0 + partIt->getVelColor().r*3.0));
 			mCircleBatch->draw();
 			gl::popModelMatrix();
 
@@ -226,11 +226,18 @@ namespace kinect {
 	{
 		int limit = 0;
 
-		gl::ScopedLineWidth scpLineWidth(2.0f);
+		mTime += mTimeSpeed;
+		mPerlin = Perlin(mOctaves, mSeed);
+
 
 		for (int i = 0; i < mGridDims.y; i++){
 			gl::ScopedColor col(ci::ColorA(colorR, colorG, colorB, 1.0));
 			gl::VertBatch vertLine(GL_LINE_STRIP);
+
+			float v = (mPerlin.fBm(vec3(i / 2.0, i, mTime) * mFrequency) + 1.0f) / 2.0f;
+			v *= v*v;
+			float val = v * 4;
+			gl::ScopedLineWidth scpLineWidth(1.0f + v*8.0);
 
 			for (int j = limit; j < mGridDims.x - limit; j++){
 
@@ -247,6 +254,13 @@ namespace kinect {
 			gl::VertBatch vertLine(GL_LINE_STRIP);
 			gl::ScopedColor col(ci::ColorA(colorR, colorG, colorB, 1.0));
 			//gl::ScopedColor col(ci::ColorA(1, 1, 1, 1.0));
+
+			float v = (mPerlin.fBm(vec3(i / 2.0, i, mTime) * mFrequency) + 1.0f) / 2.0f;
+			v *= v*v;
+			float val = v * 4;
+			gl::ScopedLineWidth scpLineWidth(1.0f + v*8.0);
+
+
 			for (int j = 0; j < mGridDims.y; j++){
 				ci::vec2 pos = mParticles.at(i + j*mGridDims.x).getPosition();
 				vertLine.vertex(pos);
@@ -273,7 +287,7 @@ namespace kinect {
 			v *= v*v;
 			float val = v * 4;
 
-			gl::ScopedLineWidth scpLineWidth(1.0 + val*6.0f);
+			gl::ScopedLineWidth scpLineWidth(1.0 + val*7.0f);
 
 			for (int j = limit; j < mGridDims.x - limit; j++){
 
@@ -301,7 +315,7 @@ namespace kinect {
 			v *= v*v;
 			float val = v * 4;
 
-			gl::ScopedLineWidth scpLineWidth(1.0 + val*6.0f);
+			gl::ScopedLineWidth scpLineWidth(1.0 + val*7.0f);
 
 			for (int j = 0; j < mGridDims.y; j++){
 				ci::vec2 pos = mParticles.at(i + j*mGridDims.x).getPosition();
@@ -315,8 +329,6 @@ namespace kinect {
 	void KinectManager::drawUpdateTriangulated(float colR, float colG, float colB)
 	{
 		//update contour with physics
-
-
 
 		for (uint32_t i = 0; i < mDevices.size(); i++) {
 			Device & device = mDevices.at(i);

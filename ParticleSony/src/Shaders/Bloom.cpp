@@ -105,11 +105,11 @@ namespace shaders{
 		ci::gl::color(ci::Color::white());
 		ci::gl::draw(mFboScene->getColorTexture(), bloomBounds);
 
-		/*
+	
 		ci::gl::enableAdditiveBlending();
 		ci::gl::draw(mFboBlur2->getColorTexture(), bloomBounds);
 		ci::gl::disableAlphaBlending();
 		ci::gl::popModelView();
-		*/
+	
 	}
 }
