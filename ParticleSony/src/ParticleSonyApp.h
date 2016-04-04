@@ -114,6 +114,7 @@ private:
 	bool								mDrawContours;
 	int									mDrawMode;
 	int									mNumKinects;
+	ci::ColorA							mBkgColor;
 	
 
 	//Kinect Manager

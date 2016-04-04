@@ -85,7 +85,7 @@ void ParticleSonyApp::setup()
 	mBloom->compileShader();
 
 	mDrawGUI = true;
-	mBloomFactor = 0.6;
+	mBloomFactor = 0.8;
 
 	//draw type
 	mDrawMode = 1;
@@ -99,10 +99,16 @@ void ParticleSonyApp::setup()
 
 	mPerlinValue = 0.3;
 
+	mBkgColor = ci::ColorA(0, 0, 0, 1);
+
+
 	mNumKinects = mKinectManagerRef->getNumKinects();
 	CI_LOG_I("NUM KINECTS CREATED " << mNumKinects);
 		 
 	mParams = params::InterfaceGl::create(getWindow(), "App parameters", toPixels(ivec2(200, 400)));
+
+	mParams->addParam("Bkg", &mBkgColor);
+	
 	mParams->addParam("Avg Fps", &mAvgFps, "");
 	mParams->addParam("Num Kinects", &mNumKinects, "");
 	mParams->addSeparator();
@@ -253,7 +259,7 @@ void ParticleSonyApp::drawMode()
 	gl::setMatricesWindow(mBloom->getSize());
 	ci::gl::setModelMatrix(ci::mat4());
 	
-	gl::clear();
+	gl::clear(mBkgColor);
 
 	switch (mDrawMode){
 
@@ -297,7 +303,7 @@ void ParticleSonyApp::drawMode()
 void ParticleSonyApp::draw()
 {
 
-	gl::clear(Color(0, 0, 0));
+
 
 
 	if (mEnableBloom){
@@ -378,6 +384,7 @@ void ParticleSonyApp::keyDown(KeyEvent event)
 		break;
 	case KeyEvent::KEY_z:
 		setMood(1);
+		mBkgColor = ci::ColorA(0, 0, 1);
 		break;
 	case KeyEvent::KEY_x:
 		setMood(2);
