@@ -88,7 +88,7 @@ namespace kinect {
 		void setupParticleGrid();
 
 		//Kinect
-		void updateKinect();
+		void updateKinect(float scaleX1, float scaleY1, int transX1, int transY1, float scaleX2, float scaleY2, int transX2, int transY2);
 
 
 		//contour

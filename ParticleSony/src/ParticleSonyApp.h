@@ -162,4 +162,15 @@ private:
 
 	//moods
 	void setMood(int);
+
+	//SCALE and TRANSLATE
+	float scaleX1;
+	float scaleY1;
+	int translateX1;
+	int translateY1;
+
+	float scaleX2;
+	float scaleY2;
+	int translateX2;
+	int translateY2;
 };

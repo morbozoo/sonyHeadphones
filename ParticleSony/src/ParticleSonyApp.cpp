@@ -90,6 +90,13 @@ void ParticleSonyApp::setup()
 	//draw type
 	mDrawMode = 1;
 
+	//Scale translate
+	scaleX1 = scaleX2 = 1;
+	scaleY1 = scaleY2 = 1;
+
+	translateX1 = translateX2 = 0;
+	translateY1 = translateY2 = 0;
+
 	//init values
 	mRateParticles	 = 15;
 	mMaxNumParticles = 300;
@@ -132,6 +139,19 @@ void ParticleSonyApp::setup()
 	mParams->addParam("Change Color", &mChangeColor, "min=0 max=1 step=1");
 	mParams->addParam("duration", &mDuration, "min=0.5 max=5.0 step=0.1");
 
+	mParams->addSeparator();
+	mParams->addParam("Scale X kinect 1", &scaleX1, "min=0 max=10 step=0.1");
+	mParams->addParam("Scale Y kinect 1", &scaleY1, "min=0 max=10 step=0.1");
+	mParams->addParam("Translate X kinect 1", &translateX1, "min=-100 max=100 step=1");
+	mParams->addParam("TranslateYX kinect 1", &translateY1, "min=-100 max=100 step=1");
+
+	
+	mParams->addSeparator();
+	mParams->addParam("Scale X kinect 2", &scaleX2, "min=0 max=10 step=0.1");
+	mParams->addParam("Scale Y kinect 2", &scaleY2, "min=0 max=10 step=0.1");
+	mParams->addParam("Translate X kinect 2", &translateX2, "min=-100 max=100 step=1");
+	mParams->addParam("TranslateYX kinect 2", &translateY2, "min=-100 max=100 step=1");
+	
 	////	mParams->addParam("Scale Contour X", &mKinectManagerRef->mScaleContour.x, "min=0 max=15 step=0.01");
 	////	mParams->addParam("Scale Contour Y", &mKinectManagerRef->mScaleContour.y, "min=0 max=15 step=0.01");
 	//mParams->addParam("Kinect Translate Y", &mKinectManagerRef->mKinectTranslateY, "min=-450 max=450 step=1");
@@ -220,7 +240,8 @@ void ParticleSonyApp::update()
 
 	mBloom->setAttenuation(mBloomFactor);
 
-	mKinectManagerRef->updateKinect();
+
+	mKinectManagerRef->updateKinect(scaleX1, scaleY1, translateX1, translateY1, scaleX2, scaleY2, translateX2, translateY2);
 
 	mKinectManagerRef->setTimePerlin(mPerlinValue);
 	
