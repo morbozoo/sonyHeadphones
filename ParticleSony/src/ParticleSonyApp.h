@@ -157,7 +157,6 @@ private:
 	// OSC
 	void setupOsc();
 	void updateOsc();
-	ci::osc::Sender sender;
 	ci::osc::Listener listener;
 
 	//moods
@@ -173,4 +172,9 @@ private:
 	float scaleY2;
 	int translateX2;
 	int translateY2;
+
+	//Activar desactivar
+	int maxNumUsers;
+	std::vector<bool> usersK1;
+	std::vector<bool> usersK2;
 };

@@ -162,6 +162,13 @@ void ParticleSonyApp::setup()
 
 	setupOsc();
 
+	maxNumUsers = 5;
+	for (int i = 0; i < maxNumUsers; i++)
+	{
+		usersK1.push_back(true);
+		usersK2.push_back(true);
+	}
+
 }
 
 // Runs update logic
@@ -241,7 +248,7 @@ void ParticleSonyApp::update()
 	mBloom->setAttenuation(mBloomFactor);
 
 
-	mKinectManagerRef->updateKinect(scaleX1, scaleY1, translateX1, translateY1, scaleX2, scaleY2, translateX2, translateY2);
+	mKinectManagerRef->updateKinect(scaleX1, scaleY1, translateX1, translateY1, scaleX2, scaleY2, translateX2, translateY2, usersK1, usersK2);
 
 	mKinectManagerRef->setTimePerlin(mPerlinValue);
 	
@@ -252,6 +259,8 @@ void ParticleSonyApp::update()
 
 	//offscreen rendering
 	offScreenRendering();
+
+	updateOsc();
 }
 
 
@@ -405,7 +414,7 @@ void ParticleSonyApp::keyDown(KeyEvent event)
 		break;
 	case KeyEvent::KEY_z:
 		setMood(1);
-		mBkgColor = ci::ColorA(0, 0, 1);
+		//mBkgColor = ci::ColorA(0, 0, 1);
 		break;
 	case KeyEvent::KEY_x:
 		setMood(2);
@@ -415,16 +424,13 @@ void ParticleSonyApp::keyDown(KeyEvent event)
 
 void ParticleSonyApp::setMood(int cual)
 {
-	ci::osc::Message message;
-	message.setAddress("/setMood/");
 	switch (cual) {
 	case 1:
 		colorR = 0;
 		colorG = 0;
 		colorB = 0;
-		mDrawMode = 1;
-		timeColor(0.29f, 0.05f, 0.1f);
-		message.addIntArg(1);
+		mDrawMode = 4;
+		timeColor(0.16f, 0.08f, 1.0f);
 		break;
 
 	case 2:
@@ -433,21 +439,66 @@ void ParticleSonyApp::setMood(int cual)
 		colorB = 0;
 		mDrawMode = 0;
 		timeColor(0.05f, 0.33f, 0.04f);
-		message.addIntArg(2);
 		break;
 	}
-	sender.sendMessage(message);
 }
 
 void ParticleSonyApp::setupOsc()
 {
-	sender.setup(destinationHost, destinationPort, true);
 	listener.setup(12345);
 }
 
 void ParticleSonyApp::updateOsc()
 {
+	while (listener.hasWaitingMessages()) {
+		osc::Message newMessage;
+		listener.getNextMessage(&newMessage);
+		if (newMessage.getAddress() == "/setMood/") {
+			int mood = newMessage.getArgAsInt32(0);
+			switch (mood) {
+			case 1:
+				setMood(1);
+				break;
+			case 2:
+				setMood(2);
+				break;
+			}
+		}
+		else if (newMessage.getAddress() == "/translateK1X/")
+		{
+			translateX1 = newMessage.getArgAsInt32(0);
+		}
+		else if (newMessage.getAddress() == "/translateK1Y/")
+		{
+			translateY1 = newMessage.getArgAsInt32(0);
+		}
+		else if (newMessage.getAddress() == "/translateK2X/")
+		{
+			translateX2 = newMessage.getArgAsInt32(0);
+		}
+		else if (newMessage.getAddress() == "/translateK2Y/")
+		{
+			translateY2 = newMessage.getArgAsInt32(0);
+		}
 
+		else if (newMessage.getAddress() == "/scaleK1X/")
+		{
+			scaleX1 = newMessage.getArgAsFloat(0);
+		}
+		else if (newMessage.getAddress() == "/scaleK1Y/")
+		{
+			scaleY1 = newMessage.getArgAsFloat(0);
+		}
+		else if (newMessage.getAddress() == "/scaleK2X/")
+		{
+			scaleX2 = newMessage.getArgAsFloat(0);
+		}
+		else if (newMessage.getAddress() == "/scaleK2Y/")
+		{
+			scaleY2 = newMessage.getArgAsFloat(0);
+		}
+		
+	}
 }
 
 // Called on exit

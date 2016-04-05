@@ -41,6 +41,7 @@ namespace contour{
 		ci::Shape2d						mShape;
 
 		int								mNumPointsShape;
+		bool							mActive;
 
 		friend class					ContourFinder;
 	};
@@ -57,7 +58,7 @@ namespace contour{
 
 		std::vector<Contour>	findContours(const ci::Channel8u &channel, int32_t smoothing = 0);
 
-		std::vector<Contour>	findContours(const ci::Channel8u &channel, const ci::vec2 & scale, const ci::vec2 & trans, int32_t smoothing = 0);
+		std::vector<Contour>	findContours(const ci::Channel8u &channel, const ci::vec2 & scale, const ci::vec2 & trans, std::vector<bool> users, int32_t smoothing = 0);
 	private:
 		ContourFinder();
 

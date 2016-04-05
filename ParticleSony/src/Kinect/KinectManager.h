@@ -88,7 +88,7 @@ namespace kinect {
 		void setupParticleGrid();
 
 		//Kinect
-		void updateKinect(float scaleX1, float scaleY1, int transX1, int transY1, float scaleX2, float scaleY2, int transX2, int transY2);
+		void updateKinect(float scaleX1, float scaleY1, int transX1, int transY1, float scaleX2, float scaleY2, int transX2, int transY2, std::vector<bool> usersK1, std::vector<bool> usersK2);
 
 
 		//contour

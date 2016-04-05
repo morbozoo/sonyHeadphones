@@ -96,7 +96,7 @@ namespace kinect {
 		mTime = 0.0;
 	}
 
-	void KinectManager::updateKinect(float scaleX1, float scaleY1, int transX1, int transY1, float scaleX2, float scaleY2, int transX2, int transY2)
+	void KinectManager::updateKinect(float scaleX1, float scaleY1, int transX1, int transY1, float scaleX2, float scaleY2, int transX2, int transY2, std::vector<bool> usersK1, std::vector<bool> usersK2)
 	{
 		mNumOfUsers = 0;
 		for (uint32_t i = 0; i < mDevices.size(); i++) {
@@ -114,7 +114,7 @@ namespace kinect {
 						scale1.y = mScaleContour.y * scaleY1;
 						trans1.x = (mKinectDims.x * i) + transX1;
 						trans1.y = mKinectTranslateY + transY1;
-						device.mContours = mContourFinder->findContours(ci::Channel8u(*device.mChannel), scale1, trans1, 8);
+						device.mContours = mContourFinder->findContours(ci::Channel8u(*device.mChannel), scale1, trans1, usersK1, 8);
 						//device.mContours = mContourFinder->findContours(ci::Channel8u(*device.mChannel), mScaleContour, ci::vec2(mKinectDims.x * i, mKinectTranslateY), 8);
 					}
 					else
@@ -125,8 +125,9 @@ namespace kinect {
 						scale2.y = mScaleContour.y * scaleY2;
 						trans2.x = (mKinectDims.x * i) + transX2;
 						trans2.y = mKinectTranslateY + transY2;
-						device.mContours = mContourFinder->findContours(ci::Channel8u(*device.mChannel), scale2, trans2, 8);
-					//	device.mContours = mContourFinder->findContours(ci::Channel8u(*device.mChannel), mScaleContour, ci::vec2(mKinectDims.x * i, mKinectTranslateY), 8);
+						device.mContours = mContourFinder->findContours(ci::Channel8u(*device.mChannel), scale2, trans2, usersK2, 8);
+					//
+						//device.mContours = mContourFinder->findContours(ci::Channel8u(*device.mChannel), mScaleContour, ci::vec2(mKinectDims.x * i, mKinectTranslateY), 8);
 					}
 					//device.mContours = mContourFinder->findContours(ci::Channel8u(*device.mChannel), mScaleContour, ci::vec2(mKinectDims.x * i, mKinectTranslateY), 8);
 

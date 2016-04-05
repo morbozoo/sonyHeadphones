@@ -147,7 +147,7 @@ namespace contour{
 	}
 
 	//contour scale and translate
-	std::vector<Contour>	ContourFinder::findContours(const ci::Channel8u &channel, const ci::vec2 & scale, const ci::vec2 & trans, int32_t smoothing)
+	std::vector<Contour>	ContourFinder::findContours(const ci::Channel8u &channel, const ci::vec2 & scale, const ci::vec2 & trans, std::vector<bool> users, int32_t smoothing)
 	{
 		vector<Contour> contours;
 		vector<vector<cv::Point> > cvContours;
@@ -165,7 +165,7 @@ namespace contour{
 
 		// Do not evaluate a pure-zero image or an exception will occur
 		if (cv::countNonZero(mCvMatDiff) > 0) {
-
+			int cont = 0;
 			// Find contours
 			cv::findContours(mCvMatDiff, cvContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 			for (vector<vector<cv::Point> >::const_iterator contourIt = cvContours.cbegin(); contourIt != cvContours.cend(); ++contourIt) {
@@ -203,7 +203,11 @@ namespace contour{
 				}
 
 				// Add contour
-				contours.push_back(contour);
+				if (users[cont])
+				{
+					contours.push_back(contour);
+				}
+				
 
 			}
 
