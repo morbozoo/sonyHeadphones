@@ -10,6 +10,7 @@
 namespace shaders{
 
 	using namespace std;
+	using namespace ci;
 
 	void Bloom::setupBlur(ci::vec2 dims)
 	{
@@ -48,7 +49,10 @@ namespace shaders{
 
 	void Bloom::bindFboScene()
 	{
+		ci::gl::pushMatrices();
+
 		mFboScene->bindFramebuffer();
+
 		//ci::gl::viewport(ci::vec2(0), mFboScene->getSize());
 		//ci::gl::setMatricesWindow(mFboScene->getSize());
 
@@ -61,7 +65,7 @@ namespace shaders{
 
 	void Bloom::updateBlur()
 	{
-		ci::gl::pushMatrices();
+		
 
 		ci::gl::ScopedGlslProg scpGlsl(mShaderBlur);
 		mShaderBlur->uniform("tex0", 0);
@@ -100,16 +104,20 @@ namespace shaders{
 
 	void Bloom::drawBlur()
 	{
+		gl::disableAlphaBlending();
+
 
 		ci::gl::pushModelView();
 		ci::gl::color(ci::Color::white());
 		ci::gl::draw(mFboScene->getColorTexture(), bloomBounds);
 
-	
+		
 		ci::gl::enableAdditiveBlending();
 		ci::gl::draw(mFboBlur2->getColorTexture(), bloomBounds);
 		ci::gl::disableAlphaBlending();
 		ci::gl::popModelView();
+
+		
 	
 	}
 }

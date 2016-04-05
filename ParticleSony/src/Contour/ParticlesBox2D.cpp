@@ -75,7 +75,9 @@ namespace physics{
 
 		//circle
 		gl::GlslProgRef solidShader = gl::getStockShader(gl::ShaderDef().color());
-		mCircleBatch = ci::gl::Batch::create(geom::Circle().radius(1).subdivisions(16), solidShader);
+		mCircleBatch = ci::gl::Batch::create(geom::Circle().radius(1).subdivisions(32), solidShader);
+
+		mCiruferenceBatch = ci::gl::Batch::create(geom::WireCircle().radius(1).subdivisions(32), solidShader);
 
 		//Square
 		mSquareBatch = ci::gl::Batch::create(geom::Rect(), solidShader);
@@ -140,10 +142,20 @@ namespace physics{
 				ci::gl::scale(ci::vec2(size * 2));
 
 				//ci::gl::ScopedColor color(ci::ColorA(col.r + vel, col.g + vel * 2, col.b + vel * 2, 0.8));
-				
-				ci::gl::ScopedColor color(col);
 
-				mCircleBatch->draw();
+				//Circle
+				{
+					ci::gl::ScopedColor color(col);
+
+					mCircleBatch->draw();
+				}
+
+				//wire circle
+				{
+					float white = 0.7 + vel;
+					ci::gl::ScopedColor color(ci::ColorA(white, white, white, 1.0));
+					mCiruferenceBatch->draw();
+				}
 
 				if (particleBox->isDead()){
 					mDeleteIndex.insert(std::pair<int, int>(particleBox->getId(), boxIndex));

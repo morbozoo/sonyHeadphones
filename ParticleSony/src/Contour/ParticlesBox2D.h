@@ -157,6 +157,8 @@ namespace physics{
 		//Circle batch
 		ci::gl::BatchRef					mCircleBatch;
 
+		ci::gl::BatchRef					mCiruferenceBatch;
+
 		ci::gl::BatchRef					mSquareBatch;
 
 		ci::gl::BatchRef					mTriangleBatch;
