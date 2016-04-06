@@ -52,6 +52,7 @@
 #include "../Contour/ParticleContour.h"
 #include "../Contour/ParticlesBox2D.h"
 #include "../Contour/ContourFinder.h"
+#include "../Contour/ParticleSystemBin.h"
 
 namespace kinect {
 
@@ -110,7 +111,10 @@ namespace kinect {
 		void drawParticlesLineV(float colorR, float colorG, float colorB);
 
 		//Rain
-		void drawRaind(float colorR, float colorG, float colorB);
+		void  setupRainParticles();
+		void  updateRainParticles();
+		void  updateContourBinParticles();
+		void drawRain(float colorR, float colorG, float colorB);
 
 		void updateParticleGrid();
 
@@ -172,6 +176,20 @@ namespace kinect {
 		float									mTime;
 		float									mTimeSpeed;
 		float									mFrequency;
+
+
+		//BIN PARTICLES
+		ci::ivec2						 mouse;
+
+		float							 timeStep;
+		float							 lineOpacity, pointOpacity;
+		float							 particleNeighborhood, particleRepulsion;
+		float							 centerAttraction;
+
+		int								 kParticles;
+		bin::ParticleSystem				 particleSystemBin;
+		bool							 isMousePressed;
+		bool							 slowMotion;
 
 		//Circle batch
 		ci::gl::BatchRef						mCircleBatch;

@@ -116,6 +116,7 @@
     <ClCompile Include="..\src\Contour\ContourFinder.cpp" />
     <ClCompile Include="..\src\Contour\ParticleContour.cpp" />
     <ClCompile Include="..\src\Contour\ParticlesBox2D.cpp" />
+    <ClCompile Include="..\src\Contour\ParticleSystemBin.cpp" />
     <ClCompile Include="..\src\Kinect\KinectManager.cpp" />
     <ClCompile Include="..\src\ParticleSonyApp.cpp" />
     <ClCompile Include="..\..\..\Cinder\blocks\Box2D\src\Box2D\Collision\b2BroadPhase.cpp" />
@@ -253,8 +254,10 @@
     <ClInclude Include="..\src\Common\SystemVars.h" />
     <ClInclude Include="..\src\Common\Utf8.h" />
     <ClInclude Include="..\src\Contour\ContourFinder.h" />
+    <ClInclude Include="..\src\Contour\ParticleBin.h" />
     <ClInclude Include="..\src\Contour\ParticleContour.h" />
     <ClInclude Include="..\src\Contour\ParticlesBox2D.h" />
+    <ClInclude Include="..\src\Contour\ParticleSystemBin.h" />
     <ClInclude Include="..\src\Kinect\KinectManager.h" />
     <ClInclude Include="..\src\ParticleSonyApp.h" />
     <ClInclude Include="..\src\Shaders\Bloom.h" />

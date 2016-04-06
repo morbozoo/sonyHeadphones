@@ -486,6 +486,9 @@
     <ClCompile Include="..\src\Contour\ParticleContour.cpp">
       <Filter>Source Files\contour</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Contour\ParticleSystemBin.cpp">
+      <Filter>Source Files\contour</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h">
@@ -520,6 +523,12 @@
     </ClInclude>
     <ClInclude Include="..\src\Shaders\Stencil.h">
       <Filter>Source Files\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Contour\ParticleSystemBin.h">
+      <Filter>Source Files\contour</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Contour\ParticleBin.h">
+      <Filter>Source Files\contour</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

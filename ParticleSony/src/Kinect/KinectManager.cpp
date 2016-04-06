@@ -219,6 +219,133 @@ namespace kinect {
 		mBox2dManager->clean();
 	}
 
+	//------------RAIN
+	void   KinectManager::setupRainParticles()
+	{
+		int binPower = 4;
+
+		particleSystemBin.setup(ci::app::getWindowWidth(), ci::app::getWindowHeight(), binPower);
+
+		kParticles = 2;
+		float padding = 0;
+		float maxVelocity = .35;
+		for (int i = 0; i < kParticles * 1024; i++) {
+			float x = ci::Rand::randFloat(padding, ci::app::getWindowWidth() - padding);
+			float y = ci::Rand::randFloat(padding, ci::app::getWindowHeight() - padding);
+			float xv = ci::Rand::randFloat(-maxVelocity, maxVelocity);
+			float yv = ci::Rand::randFloat(-maxVelocity, maxVelocity);
+			bin::Particle particle(x, y, xv, yv);
+			particleSystemBin.add(particle);
+		}
+
+		timeStep = 1;
+		lineOpacity = 0.12f;
+		pointOpacity = 0.5f;
+		slowMotion = false;
+		particleNeighborhood = 4;
+		particleRepulsion = 0.5;
+		centerAttraction = .05;
+	}
+
+	void KinectManager::updateRainParticles()
+	{
+		particleSystemBin.setTimeStep(timeStep);
+	}
+
+	void KinectManager::updateContourBinParticles()
+	{
+	
+		// Iterate through particles
+		for (std::vector<contour::Particle>::iterator partIt = mParticles.begin(); partIt != mParticles.end(); ++partIt){
+			contour::Particle& particle = *partIt;
+
+			// Get particle position components
+			float x = particle.getPosition().x;
+			float y = particle.getPosition().y;
+
+			// Iterate through contours
+			for (uint32_t k = 0; k < mDevices.size(); k++) {
+				Device& device = mDevices.at(k);
+				if (device.mKinect->isCapturing()) {
+					for (auto contourIt = device.mContours.cbegin(); contourIt != device.mContours.cend(); ++contourIt) {
+						const contour::Contour& contour = *contourIt;
+
+						// Iterate through outline to determine if particle is inside 
+						// contour and which point in outline is the closest
+						bool isInsideContour = false;
+						float minDistance = kFloatMax;
+						ci::vec2 closestPoint(kFloatMax, kFloatMax);
+
+						ci::vec2 centroid = contour.getCentroid();
+						uint32_t count = contour.getPoints().size();
+						uint32_t j = count - 1;
+						for (uint32_t i = 0; i < count; i++) {
+
+							ci::vec2 a = contour.getPoints().at(i);
+							ci::vec2 b = contour.getPoints().at(j);
+							float x1 = a.x;
+							float y1 = a.y;
+							float x2 = b.x;
+							float y2 = b.y;
+
+							// Apply ray-cast algorithm to determine if point is inside contour
+							if (((y1 < y && y2 >= y) ||
+								(y2 < y && y1 >= y)) &&
+								(x1 <= x || x2 <= x)) {
+								isInsideContour ^= (x1 + (y - y1) / (y2 - y1) * (x2 - x1) < x);
+							}
+							j = i;
+						}
+
+						if (isInsideContour) {
+							particleSystemBin.addRepulsionForce(x, y, 34, 0.6);
+						}
+
+					}
+				}
+			}
+		}
+		
+	}
+
+
+	void KinectManager::drawRain(float colorR, float colorG, float colorB)
+	{
+		ci::gl::enableAdditiveBlending();
+		gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, lineOpacity));
+
+		particleSystemBin.setupForces();
+		// apply per-particle forces
+		//	glBegin(GL_LINES);
+		for (int i = 0; i < particleSystemBin.size(); i++) {
+			bin::Particle& cur = particleSystemBin[i];
+			// global force on other particles
+			particleSystemBin.addRepulsionForce(cur, particleNeighborhood, particleRepulsion);
+			// forces on this particle
+			cur.throughWallSBottom(0, ci::app::getWindowWidth(), ci::app::getWindowHeight());
+			//cur.bounceOffWalls(0, 0, getWindowWidth(), getWindowHeight());
+			cur.addDampingForce();
+		}
+
+		updateContourBinParticles();
+		//glEnd();
+		// single global forces
+		//particleSystem.addAttractionForce(getWindowWidth()/2, getWindowHeight()/2, getWindowWidth(), centerAttraction);
+		if (isMousePressed)
+			particleSystemBin.addRepulsionForce(mouse.x, mouse.y, 100, 10);
+
+		particleSystemBin.update();
+		gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, pointOpacity));
+		particleSystemBin.drawRain();
+		ci::gl::disableAlphaBlending();
+
+		gl::color(1, 1, 1);
+
+		ci::gl::enableAdditiveBlending();
+	}
+
+
+	//DRAW METHODS
 	void KinectManager::drawParticleSquareGrid(float colorR, float colorG, float colorB)
 	{
 		mTime += mTimeSpeed;
@@ -458,11 +585,6 @@ namespace kinect {
 				}
 			}
 		}
-	}
-
-	void KinectManager::drawRaind(float colorR, float colorG, float colorB)
-	{
-
 	}
 
 	void KinectManager::drawParticlesBox2d(ci::ColorA col)

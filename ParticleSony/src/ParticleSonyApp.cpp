@@ -75,6 +75,9 @@ void ParticleSonyApp::setup()
 	mKinectManagerRef->setupKinect();
 	mKinectManagerRef->setupParticleGrid();
 
+	//rain
+	mKinectManagerRef->setupRainParticles();
+
 	//SPOUT
 	setupSpout();
 
@@ -226,6 +229,8 @@ void ParticleSonyApp::updateMode()
 		mKinectManagerRef->updateParticleGrid();
 		break;
 	case 9:
+		//lluvia
+		mKinectManagerRef->updateRainParticles();
 		break;
 	}
 }
@@ -344,6 +349,10 @@ void ParticleSonyApp::drawMode()
 	case 8:
 		mKinectManagerRef->drawParticlesLineV(colorR, colorG, colorB);
 		break;
+	case 9:
+		mKinectManagerRef->drawRain(colorR, colorG, colorB);
+		break;
+
 	}
 }
 
