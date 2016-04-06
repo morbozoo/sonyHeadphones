@@ -222,7 +222,7 @@ namespace kinect {
 	//------------RAIN
 	void   KinectManager::setupRainParticles()
 	{
-		int binPower = 4;
+		int binPower = 3;
 
 		particleSystemBin.setup(ci::app::getWindowWidth(), ci::app::getWindowHeight(), binPower);
 
@@ -315,7 +315,8 @@ namespace kinect {
 		gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, lineOpacity));
 
 		particleSystemBin.setupForces();
-		// apply per-particle forces
+
+
 		//	glBegin(GL_LINES);
 		for (int i = 0; i < particleSystemBin.size(); i++) {
 			bin::Particle& cur = particleSystemBin[i];
@@ -340,7 +341,6 @@ namespace kinect {
 		ci::gl::disableAlphaBlending();
 
 		gl::color(1, 1, 1);
-
 		ci::gl::enableAdditiveBlending();
 	}
 

@@ -6,6 +6,10 @@ namespace bin{
 
 	ParticleSystem::ParticleSystem() :
 		timeStep(1) {
+
+
+		gl::GlslProgRef solidShader = gl::getStockShader(gl::ShaderDef().color());
+		mCircleBatch = ci::gl::Batch::create(geom::Circle().radius(1).subdivisions(32), solidShader);
 	}
 
 	void ParticleSystem::setup(int width, int height, int k) {
@@ -195,32 +199,39 @@ namespace bin{
 
 		for (int i = 0; i < n; i++){
 
-			float vel = 2.1*(particles[i].xd + particles[i].yd);
+			
 			float height = (ci::app::getWindowHeight() - particles[i].y) / ci::app::getWindowHeight();
-			float rand = ci::Rand::randFloat(0, 1);
+			if (height > 0.02 && height < 0.98){
 
-			if (particles[i].type){
-				if (particles[i].y > 40){
+				float vel = 2.1*(particles[i].xd + particles[i].yd);
+	
+				if (particles[i].type){
 
-
-					gl::VertBatch vertLine(GL_LINES);
-					gl::ScopedLineWidth scpLineWidth(height * 4.2);
 					ci::gl::color(ci::ColorA(0.7, 0.7, 0.7, 0.4));
-					vertLine.vertex(ci::vec2(particles[i].x, particles[i].y));
-					vertLine.vertex(ci::vec2(particles[i].x - vel*0.4, particles[i].y - 12 - 1.8 * vel - height * 35));
-					vertLine.draw();
+
+					gl::drawLine(ci::vec2(particles[i].x, particles[i].y),
+						ci::vec2(particles[i].x - vel*0.4, particles[i].y - 12 - 1.8 * vel - height * 35));
+
+
+					gl::pushMatrices();
+					float rad = height * 17 + vel;
+					ci::gl::color(ci::ColorA(0.8, 0.8, 0.8, 0.7));
+					gl::translate(particles[i].getPos());
+					gl::scale(ci::vec2(rad));
+					mCircleBatch->draw();
+					gl::popMatrices();
+
 				}
+				else{
 
-				ci::gl::color(ci::ColorA(0.8, 0.8, 0.8, 0.7));
-				float rad = height * 17 + vel;
-				gl::drawSolidCircle(particles[i].getPos(), rad);
-
-
-			}
-			else{
-				ci::gl::color(ci::ColorA(0.0, 0.7, 0.8, 0.7));
-				float rad = height * 12 + vel*0.8 + 1.0;
-				gl::drawSolidCircle(particles[i].getPos(), rad);
+					gl::pushMatrices();
+					float rad = height * 12 + vel*0.8 + 1.0;
+					ci::gl::color(ci::ColorA(0.0, 0.7, 0.8, 0.7));
+					gl::translate(particles[i].getPos());
+					gl::scale(ci::vec2(rad));
+					mCircleBatch->draw();
+					gl::popMatrices();
+				}
 			}
 		}
 	}

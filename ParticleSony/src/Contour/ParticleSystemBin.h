@@ -44,6 +44,9 @@ namespace bin{
 
 		void draw();
 		void drawRain();
+
+		ci::gl::BatchRef					mCircleBatch;
+		
 	};
 
 	inline float InvSqrt(float x){
