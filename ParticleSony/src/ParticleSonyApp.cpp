@@ -121,6 +121,7 @@ void ParticleSonyApp::setup()
 	mParams->addSeparator();
 	//mParams->addParam("draw depth", &mKinectManagerRef->mDrawDepths, "");
 	mParams->addParam("draw contours", &mDrawContours, "");
+	mParams->addParam("draw contours alter", &mDrawContoursAlter, "");
 	mParams->addParam("draw Type", &mDrawMode).step(1).min(0).max(10);
 
 	//mParams->addParam("draw Grid", &mKinectManagerRef->mDrawGrid, "");
@@ -271,14 +272,30 @@ void ParticleSonyApp::timeColor(float colR, float colG, float colB)
 	timeline().apply(&colorB, colB, mDuration, EaseInCubic());
 }
 
+void ParticleSonyApp::timeColorFinish(float colR, float colG, float colB, int mood)
+{
+	timeline().apply(&colorR, colR, mDuration, EaseInCubic());
+	timeline().apply(&colorG, colG, mDuration, EaseInCubic());
+	timeline().apply(&colorB, colB, mDuration, EaseInCubic());
+}
+
+
 
 void ParticleSonyApp::drawBox2D()
 {
-	mKinectManagerRef->drawParticlesBox2d(ci::ColorA(colorR, colorG, colorB, 1.0));
-	mKinectManagerRef->drawUpdateTriangulated(colorR, colorG, colorB);
+	if (mDrawContoursAlter)
+	{
+		
+		mKinectManagerRef->drawContoursAlter(colorR, colorG, colorB);
+	}
+	else 
+	{
+		mKinectManagerRef->drawParticlesBox2d(ci::ColorA(colorR, colorG, colorB, 1.0));
+		mKinectManagerRef->drawUpdateTriangulated(colorR, colorG, colorB);
 
-	if (mDrawContours){
-		mKinectManagerRef->drawContours();
+		if (mDrawContours) {
+			mKinectManagerRef->drawContours();
+		}
 	}
 }
 
@@ -298,7 +315,7 @@ void ParticleSonyApp::drawMode()
 		mKinectManagerRef->setBox2dDrawMode(0);
 		break;;
 	case 1:
-		drawBox2D();
+		//drawBox2D();
 		mKinectManagerRef->setBox2dDrawMode(1);
 		break;
 	case 2:
@@ -429,16 +446,26 @@ void ParticleSonyApp::setMood(int cual)
 		colorR = 0;
 		colorG = 0;
 		colorB = 0;
+		mDrawContoursAlter = false;
 		mDrawMode = 4;
-		timeColor(0.16f, 0.08f, 1.0f);
+		timeColor(0.14f, 0.58f, 0.63f);
 		break;
 
 	case 2:
 		colorR = 0;
 		colorG = 0;
 		colorB = 0;
-		mDrawMode = 0;
-		timeColor(0.05f, 0.33f, 0.04f);
+		mDrawContoursAlter = true;
+		mDrawMode = 3;
+		timeColor(0.47f, 0.5f, 0.55f);
+		break;
+
+	case 3:
+		colorR = 0;
+		colorG = 0;
+		colorB = 0;
+		mDrawMode = 4;
+		timeColor(1.0f, 1.0f, 1.0f);
 		break;
 	}
 }
@@ -453,49 +480,53 @@ void ParticleSonyApp::updateOsc()
 	while (listener.hasWaitingMessages()) {
 		osc::Message newMessage;
 		listener.getNextMessage(&newMessage);
-		if (newMessage.getAddress() == "/setMood/") {
-			int mood = newMessage.getArgAsInt32(0);
-			switch (mood) {
-			case 1:
-				setMood(1);
-				break;
-			case 2:
-				setMood(2);
-				break;
-			}
+		console() << newMessage.getAddress() << std::endl;
+		if (newMessage.getAddress() == "/setMood1") {
+			setMood(1);
 		}
-		else if (newMessage.getAddress() == "/translateK1X/")
+		else if (newMessage.getAddress() == "/setMood2") {
+			setMood(2);
+		}
+		else if (newMessage.getAddress() == "/translateK1X")
 		{
 			translateX1 = newMessage.getArgAsInt32(0);
+			console() << newMessage.getArgAsInt32(0) << std::endl;
 		}
-		else if (newMessage.getAddress() == "/translateK1Y/")
+		else if (newMessage.getAddress() == "/translateK1Y")
 		{
 			translateY1 = newMessage.getArgAsInt32(0);
+			console() << newMessage.getArgAsInt32(0) << std::endl;
 		}
-		else if (newMessage.getAddress() == "/translateK2X/")
+		else if (newMessage.getAddress() == "/translateK2X")
 		{
 			translateX2 = newMessage.getArgAsInt32(0);
+			console() << newMessage.getArgAsInt32(0) << std::endl;
 		}
-		else if (newMessage.getAddress() == "/translateK2Y/")
+		else if (newMessage.getAddress() == "/translateK2Y")
 		{
 			translateY2 = newMessage.getArgAsInt32(0);
+			console() << newMessage.getArgAsInt32(0) << std::endl;
 		}
 
-		else if (newMessage.getAddress() == "/scaleK1X/")
+		else if (newMessage.getAddress() == "/scaleK1X")
 		{
 			scaleX1 = newMessage.getArgAsFloat(0);
+			console() << newMessage.getArgAsFloat(0) << std::endl;
 		}
-		else if (newMessage.getAddress() == "/scaleK1Y/")
+		else if (newMessage.getAddress() == "/scaleK1Y")
 		{
 			scaleY1 = newMessage.getArgAsFloat(0);
+			console() << newMessage.getArgAsFloat(0) << std::endl;
 		}
-		else if (newMessage.getAddress() == "/scaleK2X/")
+		else if (newMessage.getAddress() == "/scaleK2X")
 		{
 			scaleX2 = newMessage.getArgAsFloat(0);
+			console() << newMessage.getArgAsFloat(0) << std::endl;
 		}
-		else if (newMessage.getAddress() == "/scaleK2Y/")
+		else if (newMessage.getAddress() == "/scaleK2Y")
 		{
 			scaleY2 = newMessage.getArgAsFloat(0);
+			console() << newMessage.getArgAsFloat(0) << std::endl;;
 		}
 		
 	}

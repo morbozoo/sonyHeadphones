@@ -95,6 +95,7 @@ namespace kinect {
 		void updateParticlesBox2d();
 		void drawParticlesBox2d(ci::ColorA col);
 		void drawContours();
+		void drawContoursAlter(float colorR, float colorG, float colorB);
 		void drawUpdateTriangulated(float colR, float colG, float colB);
 
 		void setBox2dDrawMode(int value){ mBox2dManager->setDrawMode(value); }

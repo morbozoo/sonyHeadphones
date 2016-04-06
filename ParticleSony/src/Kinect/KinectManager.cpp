@@ -410,6 +410,66 @@ namespace kinect {
 
 	}
 
+	void KinectManager::drawContoursAlter(float colorR, float colorG, float colorB)
+	{
+
+		ci::gl::ScopedColor col(ci::ColorA(colorR, colorG, colorB, 1));
+		for (uint32_t i = 0; i < mDevices.size(); i++) {
+			Device& device = mDevices.at(i);
+
+			for (auto contourIt = device.mContours.begin(); contourIt != device.mContours.end(); ++contourIt) {
+				ci::vec2 mostLeft = contourIt->getPoint(0);
+				ci::vec2 mostRight = contourIt->getPoint(0);
+				ci::vec2 top = contourIt->getPoint(0);
+				ci::vec2 bottomRight = contourIt->getPoint(0);
+				ci::vec2 bottomLeft = contourIt->getPoint(0);
+				//ci::gl::VertBatch vertLine(GL_LINE_STRIP);
+				ci::gl::VertBatch vertFill(GL_TRIANGLES);
+				for (int i = 0; i < contourIt->getPoints().size(); i++) {
+					ci::vec2 pos = contourIt->getPoint(i);
+					if (pos.x < mostLeft.x)
+					{
+						mostLeft = pos;
+
+					}
+					else if (pos.x > mostRight.x)
+					{
+						mostRight = pos;
+					}
+					else if (pos.y < top.y)
+					{
+						top = pos;
+					}
+					else if (pos.y > bottomLeft.y && pos.x < top.x)
+					{
+						bottomLeft = pos;
+					}
+					else if (pos.y > bottomRight.y && pos.x > top.x)
+					{
+						bottomRight = pos;
+					}
+					
+				}
+
+				vertFill.vertex(top);
+				vertFill.vertex(mostLeft);
+				vertFill.vertex(bottomLeft);
+
+				vertFill.vertex(top);
+				vertFill.vertex(bottomLeft);
+				vertFill.vertex(bottomRight);
+
+				vertFill.vertex(top);
+				vertFill.vertex(bottomRight);
+				vertFill.vertex(mostRight);
+
+				vertFill.draw();
+			}
+		}
+
+
+	}
+
 
 
 	void KinectManager::onDepthData(ci::Surface16u surface, const KinectSdk::DeviceOptions &deviceOptions)

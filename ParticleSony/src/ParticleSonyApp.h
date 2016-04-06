@@ -112,6 +112,7 @@ private:
 	float								mAvgFps;
 	bool								mDrawGUI;
 	bool								mDrawContours;
+	bool								mDrawContoursAlter;
 	int									mDrawMode;
 	int									mNumKinects;
 	ci::ColorA							mBkgColor;
@@ -146,8 +147,8 @@ private:
 
 	//Change color
 	void timeColor(float colR, float colG, float colB);
+	void timeColorFinish(float colR, float colG, float colB, int mood);
 	float mDuration;
-
 	ci::Color   mColor;
 	ci::Anim<float>   colorR;
 	ci::Anim<float>   colorG;
