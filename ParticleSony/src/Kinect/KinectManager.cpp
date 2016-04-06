@@ -98,7 +98,7 @@ namespace kinect {
 		mSeed = clock() & 65535;
 		mOctaves = 8;
 		mFrequency = 1 / 200.0f;
-		mTimeSpeed = 0.8;
+		mTimeSpeed = 0.85;
 		mTime = 0.0;
 	}
 
@@ -406,42 +406,54 @@ namespace kinect {
 
 		mPerlin = Perlin(mOctaves, mSeed);
 		int i = 0;
-		int j = 0;
+		int j = 0; 
+
 		for (std::vector<contour::Particle>::iterator partIt = mParticles.begin(); partIt != mParticles.end(); ++partIt) {
 
-			//if (!partIt->isActivated()){
-			float v = (mPerlin.fBm(vec3(j, i, mTime) * mFrequency) + 1.0f) / 2.0f;
+			ci::ivec2 pos = ci::ivec2(partIt->getPosition());
+
+			float v = (mPerlin.fBm(vec3(i, j, mTime) * mFrequency) + 1.0f) / 2.0f;
 
 			v *= v*v;
 			float val = v * 4;
 
 			ci::ColorA perlinColor = ci::ColorA(val, val, val, val);
 			partIt->setVelColor(perlinColor);
-			//}
 
 			gl::pushModelMatrix();
-
-			ci::ivec2 pos = ci::ivec2(partIt->getPosition());
-			ci::ColorA outColor;
-
-			outColor = ci::ColorA(colorR, colorG, colorB, partIt->getVelColor().r);
-
-			//ci::ColorA col = mBackgroundImg->getPixel(pos);
+			ci::ColorA outColor = ci::ColorA(colorR, colorG, colorB, partIt->getVelColor().r);
 
 			{
-				gl::ScopedColor cdol(outColor);
+				//outer blue
 				gl::translate(partIt->getPosition());
-				gl::scale(vec2(1.0 + partIt->getVelocity() / 3.0 + partIt->getVelColor().r*10.0));
-				mCircleBatch->draw();
-			}
+				gl::scale(vec2(3.0 + partIt->getVelocity() / 2.5 + partIt->getVelColor().r*22.0));
 
-			//contour
-			{
-				gl::ScopedColor cdol(ci::ColorA(1, 1, 1, 1));
-				mCircleContourBatch->draw();
+				{
+					gl::ScopedColor cdol(outColor);
+					mCircleBatch->draw();
+				}
+
+				//inser black
+				gl::scale(vec2(0.6));
+				{
+					gl::ScopedColor dol(ci::ColorA(0, 0, 0, 0.8));
+					mCircleBatch->draw();
+				}
+
+
+				//contour
+				gl::scale(vec2(1.1));
+				{
+					gl::ScopedColor cdol(ci::ColorA(1, 1, 1, 1));
+					mCircleContourBatch->draw();
+				}
+				
 			}
 
 			gl::popModelMatrix();
+
+
+
 
 			if (i >= mGridDims.x){
 				j++;
@@ -699,6 +711,8 @@ namespace kinect {
 			if (index == mDevices.at(i).mKinect->getDeviceOptions().getDeviceIndex()) {
 				mDevices.at(i).mTexture = ci::gl::Texture::create(surface);
 				mDevices.at(i).mChannel = ci::Channel16u::create(surface.getChannelRed());
+				
+
 				break;
 			}
 		}
@@ -791,11 +805,13 @@ namespace kinect {
 						// Set particle acceleration away from center
 						vec2 dir = particle.getPosition() - centroid;
 						float dist = distance(particle.getPosition(), centroid);
+			
 						if (dist < kInteractiveRadius) {
 							float amp = (1.0f - (dist / kInteractiveRadius)) * kInteractiveForce;
 							particle.addAcceleration(dir * amp);
 							particle.activateParticle();
 						}
+					
 						
 
 						// Particle is inside contour
