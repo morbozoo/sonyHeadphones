@@ -210,6 +210,7 @@ void ParticleSonyApp::updateMode()
 
 
 	case 4:
+
 		mKinectManagerRef->updateParticleGrid();
 		break;
 	case 5:
@@ -223,6 +224,8 @@ void ParticleSonyApp::updateMode()
 		break;
 	case 8:
 		mKinectManagerRef->updateParticleGrid();
+		break;
+	case 9:
 		break;
 	}
 }
@@ -326,6 +329,7 @@ void ParticleSonyApp::drawMode()
 		break;
 
 	case 4:
+		mKinectManagerRef->drawSkeleton();
 		mKinectManagerRef->drawParticleSquareGrid(colorR, colorG, colorB);
 		break;
 	case 5:

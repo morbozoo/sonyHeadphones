@@ -31,6 +31,8 @@ namespace kinect {
 
 			device.mCallbackId = device.mKinect->addDepthCallback(&KinectManager::onDepthData, this);
 
+			device.mSkeletonCallbackId = device.mKinect->addSkeletonTrackingCallback(&KinectManager::onSkeletonData, this);
+
 			device.mTexture = ci::gl::Texture::create(320, 240);
 
 			mDevices.push_back(device);
@@ -147,6 +149,64 @@ namespace kinect {
 					device.mKinect->start();
 
 					CI_LOG_E("ERROR KINECT " << i + 1);
+				}
+			}
+		}
+	}
+
+	//draw skeleton
+	void KinectManager::drawSkeleton()
+	{
+
+		for (uint32_t i = 0; i < mDevices.size(); i++) {
+			Device & device = mDevices.at(i);
+			// We're capturing
+			if (device.mKinect->isCapturing()) {
+
+				// Set up 3D view
+				//gl::setMatrices(mCamera);
+
+				// Iterate through skeletons
+				uint32_t i = 0;
+				for (std::vector<Skeleton>::const_iterator skeletonIt = device.mSkeletons.cbegin(); skeletonIt != device.mSkeletons.cend(); ++skeletonIt, i++) {
+
+					// Set color
+					Colorf color = device.mKinect->getUserColor(i);
+
+					// Iterate through joints
+					for (Skeleton::const_iterator boneIt = skeletonIt->cbegin(); boneIt != skeletonIt->cend(); ++boneIt) {
+
+						// Set user color
+						gl::color(color);
+
+						// Get position and rotation
+						const Bone& bone = boneIt->second;
+						vec3 position = bone.getPosition();
+	
+						//Matrix44f transform = bone.getAbsoluteRotationMatrix();
+						//Vec3f direction = transform.transformPoint(position).normalized();
+						//direction *= 0.05f;
+						//position.z *= -1.0f;
+
+						// Draw bone
+						//glLineWidth(2.0f);
+						JointName startJoint = bone.getStartJoint();
+						if (skeletonIt->find(startJoint) != skeletonIt->end()) {
+							vec3 destination = skeletonIt->find(startJoint)->second.getPosition();
+							//destination.z *= -1.0f;
+							gl::drawLine(ci::vec2(position), ci::vec2(destination));
+						}
+
+						// Draw joint
+						gl::drawSphere(position, 0.025f, 16);
+
+						// Draw joint orientation
+						//glLineWidth(0.5f);
+						//gl::color(ColorAf::white());
+						//gl::drawVector(position, position + direction, 0.05f, 0.01f);
+
+					}
+
 				}
 			}
 		}
@@ -493,18 +553,6 @@ namespace kinect {
 
 
 
-	void KinectManager::onDepthData(ci::Surface16u surface, const KinectSdk::DeviceOptions &deviceOptions)
-	{
-		int32_t index = deviceOptions.getDeviceIndex();
-		for (size_t i = 0; i < mDevices.size(); ++i) {
-			if (index == mDevices.at(i).mKinect->getDeviceOptions().getDeviceIndex()) {
-				mDevices.at(i).mTexture = ci::gl::Texture::create(surface);
-				mDevices.at(i).mChannel = ci::Channel16u::create(surface.getChannelRed());
-				break;
-			}
-		}
-	}
-
 
 	void KinectManager::addParticle(ci::vec2 & pos)
 	{
@@ -521,12 +569,38 @@ namespace kinect {
 		return mBox2dManager->getNumParticles();
 	}
 
+	//depth
+	void KinectManager::onDepthData(ci::Surface16u surface, const KinectSdk::DeviceOptions &deviceOptions)
+	{
+		int32_t index = deviceOptions.getDeviceIndex();
+		for (size_t i = 0; i < mDevices.size(); ++i) {
+			if (index == mDevices.at(i).mKinect->getDeviceOptions().getDeviceIndex()) {
+				mDevices.at(i).mTexture = ci::gl::Texture::create(surface);
+				mDevices.at(i).mChannel = ci::Channel16u::create(surface.getChannelRed());
+				break;
+			}
+		}
+	}
+
+	//skeleton
+	void KinectManager::onSkeletonData(std::vector<Skeleton> skeletons, const DeviceOptions &deviceOptions)
+	{
+		int32_t index = deviceOptions.getDeviceIndex();
+		for (size_t i = 0; i < mDevices.size(); ++i) {
+			if (index == mDevices.at(i).mKinect->getDeviceOptions().getDeviceIndex()) {
+				mDevices.at(i).mSkeletons = skeletons;
+				break;
+			}
+		}
+	}
+
+	//clean
 	void KinectManager::cleanUp()
 	{
 		for (uint32_t i = 0; i < mDevices.size(); i++) {
 			Device & device = mDevices.at(i);
 			device.mKinect->removeCallback(device.mCallbackId);
-			//device.mKinect->removeCallback(device.mSkeletonCallbackId);
+			device.mKinect->removeCallback(device.mSkeletonCallbackId);
 			device.mKinect->stop();
 		}
 		mDevices.clear();

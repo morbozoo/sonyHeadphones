@@ -90,6 +90,7 @@ namespace kinect {
 		//Kinect
 		void updateKinect(float scaleX1, float scaleY1, int transX1, int transY1, float scaleX2, float scaleY2, int transX2, int transY2, std::vector<bool> usersK1, std::vector<bool> usersK2);
 
+		void drawSkeleton();
 
 		//contour
 		void updateParticlesBox2d();
@@ -147,7 +148,7 @@ namespace kinect {
 
 		// Callback
 		void									onDepthData(ci::Surface16u surface, const KinectSdk::DeviceOptions &deviceOptions);
-
+		void									onSkeletonData(std::vector<KinectSdk::Skeleton> skeletons, const KinectSdk::DeviceOptions &deviceOptions);
 
 		ci::vec2								mKinectDims;
 		ci::vec2								mScaleContour;
