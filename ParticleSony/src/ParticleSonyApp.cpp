@@ -232,6 +232,10 @@ void ParticleSonyApp::updateMode()
 		//lluvia
 		mKinectManagerRef->updateRainParticles();
 		break;
+	case 10:
+		mKinectManagerRef->updateParticleGrid();
+		break;
+
 	}
 }
 
@@ -334,7 +338,7 @@ void ParticleSonyApp::drawMode()
 		break;
 
 	case 4:
-		mKinectManagerRef->drawSkeleton();
+		
 		mKinectManagerRef->drawParticleSquareGrid(colorR, colorG, colorB);
 		break;
 	case 5:
@@ -351,6 +355,9 @@ void ParticleSonyApp::drawMode()
 		break;
 	case 9:
 		mKinectManagerRef->drawRain(colorR, colorG, colorB);
+		break;
+	case 10:
+		mKinectManagerRef->drawSkeleton();
 		break;
 
 	}

@@ -158,6 +158,7 @@ namespace kinect {
 	void KinectManager::drawSkeleton()
 	{
 
+		gl::setMatricesWindow(app::getWindowSize());
 		for (uint32_t i = 0; i < mDevices.size(); i++) {
 			Device & device = mDevices.at(i);
 			// We're capturing
@@ -165,6 +166,8 @@ namespace kinect {
 
 				// Set up 3D view
 				//gl::setMatrices(mCamera);
+				gl::pushMatrices();
+				//gl::scale(vec2(app::getWindowSize()) / vec2(mTexture.getSize()));
 
 				// Iterate through skeletons
 				uint32_t i = 0;
@@ -179,31 +182,18 @@ namespace kinect {
 						// Set user color
 						gl::color(color);
 
-						// Get position and rotation
 						const Bone& bone = boneIt->second;
 						vec3 position = bone.getPosition();
-	
-						//Matrix44f transform = bone.getAbsoluteRotationMatrix();
-						//Vec3f direction = transform.transformPoint(position).normalized();
-						//direction *= 0.05f;
-						//position.z *= -1.0f;
+						vec3 destination = skeletonIt->at(bone.getStartJoint()).getPosition();
+						vec2 positionScreen = vec2(device.mKinect->getSkeletonColorPos(position));
+						vec2 destinationSceen = vec2(device.mKinect->getSkeletonColorPos(destination));
 
 						// Draw bone
-						//glLineWidth(2.0f);
-						JointName startJoint = bone.getStartJoint();
-						if (skeletonIt->find(startJoint) != skeletonIt->end()) {
-							vec3 destination = skeletonIt->find(startJoint)->second.getPosition();
-							//destination.z *= -1.0f;
-							gl::drawLine(ci::vec2(position), ci::vec2(destination));
-						}
+						gl::drawLine(positionScreen, destinationSceen);
 
 						// Draw joint
-						gl::drawSphere(position, 0.025f, 16);
+						gl::drawSolidCircle(positionScreen, 10.0f, 16);
 
-						// Draw joint orientation
-						//glLineWidth(0.5f);
-						//gl::color(ColorAf::white());
-						//gl::drawVector(position, position + direction, 0.05f, 0.01f);
 
 					}
 
