@@ -84,10 +84,14 @@ namespace kinect {
 
 		//Circle Batch
 		gl::GlslProgRef solidShader = gl::getStockShader(gl::ShaderDef().color());
-		mCircleBatch = ci::gl::Batch::create(geom::Circle().radius(CIRCLE_RAD), solidShader);
+		mCircleBatch = ci::gl::Batch::create(geom::Circle().radius(1).subdivisions(32), solidShader);
 
 		//square
 		mSquareBatch = ci::gl::Batch::create(geom::Rect(), solidShader);
+
+		mSquareContourBatch  = ci::gl::Batch::create(geom::WireRoundedRect().cornerRadius(0.0), solidShader);
+
+		mCircleContourBatch = ci::gl::Batch::create(geom::WireCircle().subdivisions(32), solidShader);
 
 		mSeed = clock() & 65535;
 		mOctaves = 8;
@@ -184,12 +188,19 @@ namespace kinect {
 
 
 			//ci::ColorA col = mBackgroundImg->getPixel(pos);
+			{
+				gl::ScopedColor cdol(outColor);
+				gl::translate(partIt->getPosition());
+				gl::scale(vec2(1.0 + partIt->getVelocity() / 3.0 + val * 10));
 
-			gl::ScopedColor cdol(outColor);
-			gl::translate(partIt->getPosition());
-			gl::scale(vec2(1.0 + partIt->getVelocity() / 1.5 + val*10));
-			
-			mSquareBatch->draw();
+				mSquareBatch->draw();
+			}
+
+			//contour
+			{
+				gl::ScopedColor cdol(ci::ColorA(1, 1, 1, 1));
+				mSquareContourBatch->draw();
+			}
 
 			gl::popModelMatrix();
 
@@ -230,10 +241,19 @@ namespace kinect {
 
 			//ci::ColorA col = mBackgroundImg->getPixel(pos);
 
-			gl::ScopedColor cdol(outColor);
-			gl::translate(partIt->getPosition());
-			gl::scale(vec2(1.0 + partIt->getVelocity() / 2.0 + partIt->getVelColor().r*3.0));
-			mCircleBatch->draw();
+			{
+				gl::ScopedColor cdol(outColor);
+				gl::translate(partIt->getPosition());
+				gl::scale(vec2(1.0 + partIt->getVelocity() / 3.0 + partIt->getVelColor().r*10.0));
+				mCircleBatch->draw();
+			}
+
+			//contour
+			{
+				gl::ScopedColor cdol(ci::ColorA(1, 1, 1, 1));
+				mCircleContourBatch->draw();
+			}
+
 			gl::popModelMatrix();
 
 			if (i >= mGridDims.x){
@@ -254,19 +274,20 @@ namespace kinect {
 
 
 		for (int i = 0; i < mGridDims.y; i++){
-			gl::ScopedColor col(ci::ColorA(colorR, colorG, colorB, 1.0));
-			gl::VertBatch vertLine(GL_LINE_STRIP);
+			
 
 			float v = (mPerlin.fBm(vec3(i / 2.0, i, mTime) * mFrequency) + 1.0f) / 2.0f;
 			v *= v*v;
 			float val = v * 4;
+
+			gl::ScopedColor col(ci::ColorA(colorR, colorG, colorB, 1.0));
+			gl::VertBatch vertLine(GL_LINE_STRIP);
 			gl::ScopedLineWidth scpLineWidth(1.0f + v*8.0);
 
 			for (int j = limit; j < mGridDims.x - limit; j++){
 
 				ci::vec2 pos = mParticles.at(i*mGridDims.x + j).getPosition();
 				vertLine.vertex(pos);
-
 			}
 			vertLine.draw();
 		}
@@ -281,7 +302,7 @@ namespace kinect {
 			float v = (mPerlin.fBm(vec3(i / 2.0, i, mTime) * mFrequency) + 1.0f) / 2.0f;
 			v *= v*v;
 			float val = v * 4;
-			gl::ScopedLineWidth scpLineWidth(1.0f + v*8.0);
+			gl::ScopedLineWidth scpLineWidth(1.0f + v*9.0);
 
 
 			for (int j = 0; j < mGridDims.y; j++){
@@ -310,7 +331,7 @@ namespace kinect {
 			v *= v*v;
 			float val = v * 4;
 
-			gl::ScopedLineWidth scpLineWidth(1.0 + val*7.0f);
+			gl::ScopedLineWidth scpLineWidth(1.0 + val*9.0f);
 
 			for (int j = limit; j < mGridDims.x - limit; j++){
 

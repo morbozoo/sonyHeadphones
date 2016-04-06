@@ -231,12 +231,10 @@ void ParticleSonyApp::updateMode()
 //--- offscreen rendering
 void ParticleSonyApp::offScreenRendering()
 {
-
-	mBloom->bindFboScene();
-	drawMode();
-	mBloom->unbindFboScene();
-
 	if (mEnableBloom){
+		mBloom->bindFboScene();
+		drawMode();
+		mBloom->unbindFboScene();
 		mBloom->updateBlur();
 	}
 }
@@ -304,7 +302,6 @@ void ParticleSonyApp::drawMode()
 
 	gl::ScopedViewport scpView(ci::vec2(0), mBloom->getSize());
 	gl::setMatricesWindow(mBloom->getSize());
-	ci::gl::setModelMatrix(ci::mat4());
 	
 	gl::clear(mBkgColor);
 
@@ -351,22 +348,18 @@ void ParticleSonyApp::draw()
 {
 
 
-
-
 	if (mEnableBloom){
 		mBloom->drawBlur();
 	}
 	else{
-		ci::gl::pushModelView();
 
 		gl::ScopedViewport scpView(ci::vec2(0), getWindowSize());
 		gl::setMatricesWindow(getWindowSize());
 		ci::gl::setModelMatrix(ci::mat4());
 
-		ci::gl::color(ci::Color::white());
-		ci::gl::draw(mBloom->getFBOScene()->getColorTexture(), getWindowSize());
+		ci::gl::color(mBkgColor);
+		drawMode();
 
-		ci::gl::popModelView();
 	}
 
 	if (mDrawGUI){

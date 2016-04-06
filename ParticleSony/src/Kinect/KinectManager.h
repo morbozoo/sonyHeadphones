@@ -64,7 +64,7 @@ namespace kinect {
 
 
 	//particle grid
-	const float kPointSpacing = 14.0f;
+	const float kPointSpacing = 15.0f;
 	const float kInteractiveForce = 0.9f;
 	const float kInteractiveRadius = 70.0f;
 	const float kFloatMax = std::numeric_limits<float>::max();
@@ -174,6 +174,10 @@ namespace kinect {
 
 		//Circle batch
 		ci::gl::BatchRef						mCircleBatch;
+
+		ci::gl::BatchRef						mCircleContourBatch;
+
+		ci::gl::BatchRef						mSquareContourBatch;
 
 		ci::gl::BatchRef						mSquareBatch;
 		
